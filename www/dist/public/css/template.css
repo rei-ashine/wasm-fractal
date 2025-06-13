@@ -1,0 +1,141 @@
+html,
+body {
+  overflow-x: hidden; /* Prevent display collapse */
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  padding-top: 5rem;
+  font-family: "Black Ops One", cursive; /* Google Fonts */
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.container {
+  max-width: 42em;
+}
+
+img.ribbon {
+  width: 50px;
+  height: 50px;
+}
+
+.navbar-dark .navbar-toggler {
+  border-color: rgba(0, 0, 0, 0);
+  font-size: 50px;
+}
+
+.overlay {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  overflow-x: hidden;
+  transition: 0.5s;
+}
+.overlay-content {
+  position: relative;
+  top: 25%;
+  max-width: 80%;
+  left: 10%;
+  text-align: center;
+  margin-top: 30px;
+}
+.overlay a {
+  padding: 8px;
+  text-decoration: none;
+  font-size: 36px;
+  color: #333;
+  display: block;
+  transition: 0.3s;
+  font-weight: 500;
+}
+.overlay a:hover, .overlay a:focus {
+  color: #333;
+}
+.overlay {
+  position: absolute;
+  top: 20px;
+  right: 45px;
+  font-size: 40px;
+}
+@media screen and (max-height: 450px) {
+  .overlay a {font-size: 20px}
+  .overlay {
+    font-size: 40px;
+    top: 15px;
+    right: 35px;
+  }
+}
+
+.menu-btn {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  height: 60px;
+  width: 60px;
+  justify-content: center;
+  align-items: center;
+  z-index: 90;
+}
+.menu-btn span,
+.menu-btn span:before,
+.menu-btn span:after {
+  content: "";
+  display: block;
+  height: 3px;
+  width: 25px;
+  border-radius: 3px;
+  background-color: #ffffff;
+  position: absolute;
+}
+.menu-btn span:before {
+  bottom: 8px;
+}
+.menu-btn span:after {
+  top: 8px;
+}
+
+#menu-btn-check:checked ~ .menu-btn span {
+  background-color: rgba(255, 255, 255, 0);
+}
+#menu-btn-check:checked ~ .menu-btn span::before {
+  bottom: 0;
+  transform: rotate(45deg);
+}
+#menu-btn-check:checked ~ .menu-btn span::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+#menu-btn-check {
+    display: none;
+}
+
+.btn-pop {
+  border-radius: 0.2rem;
+  transition: 0.1s;
+}
+.btn-pop i {
+  line-height: 3.5rem;
+}
+.btn-pop:hover {
+  box-shadow: 20px 20px 60px #333, -20px -20px 60px #fff;
+}
+
+.marker {
+  display: inline;
+  background-image: linear-gradient(90deg, #FFFE03, #FFFE03);
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: 0 40%;
+  transition: all 0.1s ease;
+  cursor: pointer;
+}
+.marker:hover {
+  background-size: 100% 40%;
+}

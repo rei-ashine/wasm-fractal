@@ -5,7 +5,7 @@ function draw(context, canvas_w, canvas_h, data) {
 }
 
 console.log("[INFO] Start loading WASM 🚀");
-const wasm = import("../pkg").catch(console.error);
+const wasm = import("../wasm-dist").catch(console.error);
 console.log("[INFO] End loading WASM ✅");
 
 Promise.all([wasm]).then(async function (
