@@ -16,7 +16,8 @@ export interface WorkerRequest {
 
 export interface WorkerResponse {
   id: number;
-  data: Uint8ClampedArray;
+  data?: Uint8ClampedArray;
+  error?: string;
 }
 
 // Keep a cached reference to wasm once loaded
@@ -65,5 +66,6 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
     }
   } catch (err) {
     console.error("Worker error:", err);
+    (self as any).postMessage({ id: req.id, error: String(err) } as WorkerResponse);
   }
 };

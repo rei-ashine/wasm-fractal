@@ -126,8 +126,24 @@ export function useFractalWorkers() {
           }
 
           const res = e.data;
+
+          // エラーが返された場合はスキップしてカウントを進める
+          if (res.error) {
+            console.warn(`Chunk ${res.id} failed:`, res.error);
+            activeJobs.delete(res.id);
+            chunksCompleted++;
+            if (chunksCompleted === totalChunks) {
+              setElapsed(Math.round(performance.now() - start_time));
+              setIsRendering(false);
+            } else {
+              idleWorkers.push(worker);
+              assignJobs();
+            }
+            return;
+          }
+
           const jobInfo = activeJobs.get(res.id);
-          if (jobInfo) {
+          if (jobInfo && res.data) {
             const imgData = new ImageData(res.data as any, jobInfo.px_w, jobInfo.px_h);
             ctx.putImageData(imgData, jobInfo.px_x, jobInfo.px_y);
             activeJobs.delete(res.id);

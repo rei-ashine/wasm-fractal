@@ -18,7 +18,7 @@ pub fn generate_julia_set(
 ) -> Vec<u8> {
     // To create a Uint8ClampedArray type that is an array of 8-bit unsigned integers in JavaScript,
     // set color information with Vec<u8>.
-    let mut data = vec![];
+    let mut data = Vec::with_capacity((width * height * 4) as usize);
 
     // Initial value of c
     let c = Complex {re: real, im: imaginary};
