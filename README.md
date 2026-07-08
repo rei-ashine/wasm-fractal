@@ -10,40 +10,57 @@ DATE: Jul. 8th, 2026
 .
 ├── Cargo.lock
 ├── Cargo.toml
+├── GEMINI.md
+├── pkg
+│   ├── package.json
+│   ├── README.md
+│   ├── wasm_fractal_bg.js
+│   ├── wasm_fractal_bg.wasm
+│   ├── wasm_fractal_bg.wasm.d.ts
+│   ├── wasm_fractal.d.ts
+│   └── wasm_fractal.js
 ├── PNG
-│   └── WASM-Fractal.png
+│   └── WASM-Fractal.png
 ├── README.md
 ├── src
-│   ├── julia.rs
-│   ├── lib.rs
-│   ├── logic.rs
-│   ├── mandelbrot.rs
-│   └── utils.rs
+│   ├── julia.rs
+│   ├── lib.rs
+│   ├── logic.rs
+│   ├── mandelbrot.rs
+│   └── utils.rs
 └── www
+    ├── index.html
     ├── LICENSE-APACHE
     ├── LICENSE-MIT
-    ├── README.md
-    ├── bootstrap.js
-    ├── index.html
-    ├── index.js
     ├── package-lock.json
     ├── package.json
     ├── public
-    │   ├── assets
-    │   │   ├── GitHub-Mark-120px-plus.png
-    │   │   ├── GitHub-Mark-Light-120px-plus.png
-    │   │   └── rust-logo-256x256.png
-    │   ├── css
-    │   │   └── template.css
-    │   ├── html
-    │   │   ├── julia.html
-    │   │   ├── mandelbrot.html
-    │   │   ├── privacy.html
-    │   │   └── terms.html
-    │   └── png
-    │       ├── julia.png
-    │       └── mandelbrot.png
-    └── webpack.config.js
+    │   ├── assets
+    │   │   ├── GitHub-Mark-120px-plus.png
+    │   │   ├── GitHub-Mark-Light-120px-plus.png
+    │   │   └── rust-logo-256x256.png
+    │   ├── css
+    │   │   └── template.css
+    │   └── png
+    │       ├── julia.png
+    │       └── mandelbrot.png
+    ├── README.md
+    ├── src
+    │   ├── components
+    │   │   └── Layout.tsx
+    │   ├── hooks
+    │   │   └── useFractalWorkers.ts
+    │   ├── main.tsx
+    │   ├── pages
+    │   │   ├── Home.tsx
+    │   │   ├── Julia.tsx
+    │   │   ├── Mandelbrot.tsx
+    │   │   ├── Privacy.tsx
+    │   │   └── Terms.tsx
+    │   └── workers
+    │       └── fractalWorker.ts
+    ├── tsconfig.json
+    └── vite.config.ts
 ```
 
 ---
@@ -53,17 +70,21 @@ DATE: Jul. 8th, 2026
  Language              Files        Lines         Code     Comments       Blanks
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  CSS                       1          141          132            0            9
- JavaScript                3          103           82            7           14
- JSON                      2         4437         4437            0            0
- Markdown                  2          135            0          112           23
- Rust                      5          343          245           46           52
- TOML                      1           13           11            0            2
+ JSON                      3         2101         2101            0            0
+ Rust                      5          342          244           46           52
+ TOML                      1           20           16            0            4
+ TSX                       7          442          390            5           47
+ TypeScript                3          262          208           11           43
 ─────────────────────────────────────────────────────────────────────────────────
- HTML                      5          595          459           41           95
- |- JavaScript             5           57           52            0            5
- (Total)                              652          511           41          100
+ HTML                      1           30           24            6            0
+ |- JavaScript             1            4            4            0            0
+ (Total)                               34           28            6            0
+─────────────────────────────────────────────────────────────────────────────────
+ Markdown                  3          232            0          178           54
+ |- BASH                   1           11            7            3            1
+ (Total)                              243            7          181           55
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- Total                    19         5824         5418          206          200
+ Total                    24         3585         3126          249          210
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 

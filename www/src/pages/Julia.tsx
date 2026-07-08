@@ -26,7 +26,7 @@ const Julia: React.FC = () => {
     if (w.MathJax && w.MathJax.typesetPromise) {
       w.MathJax.typesetPromise().catch((err: any) => console.log(err));
     }
-  });
+  }, []);
 
   useEffect(() => {
     draw();

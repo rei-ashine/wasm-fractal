@@ -39,7 +39,7 @@ jobs:
           node-version: '20'
 
       - name: Build Wasm
-        run: wasm-pack build
+        run: wasm-pack build --target bundler
 
       - name: Build Frontend (Vite)
         working-directory: ./www
