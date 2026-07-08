@@ -128,7 +128,7 @@ export function useFractalWorkers() {
           const res = e.data;
           const jobInfo = activeJobs.get(res.id);
           if (jobInfo) {
-            const imgData = new ImageData(res.data, jobInfo.px_w, jobInfo.px_h);
+            const imgData = new ImageData(res.data as any, jobInfo.px_w, jobInfo.px_h);
             ctx.putImageData(imgData, jobInfo.px_x, jobInfo.px_y);
             activeJobs.delete(res.id);
           }
