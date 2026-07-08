@@ -114,10 +114,10 @@ mod tests_julia{
 
         // Create an ImageBuffer from the data
         let img = ImageBuffer::<Rgba<u8>, _>::from_raw(width, height, data).unwrap();
-        match fs::create_dir_all("www/public/png") {
+        match fs::create_dir_all("target/tmp") {
             Err(why) => println!("! {:?}", why.kind()),
             Ok(_) => {},
         }
-        img.save("www/public/png/julia.png").unwrap();
+        img.save("target/tmp/julia.png").unwrap();
     }
 }

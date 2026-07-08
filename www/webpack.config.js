@@ -14,10 +14,13 @@ module.exports = {
         {
           from: "index.html",
         },
+        {
+          from: "public",
+        },
       ],
     }),
   ],
   experiments: {
-    syncWebAssembly: true,
+    asyncWebAssembly: true,
   },
 };

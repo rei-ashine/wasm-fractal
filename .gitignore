@@ -38,3 +38,8 @@ Temporary Items
 .apdisk
 ### <-- For MacOS
 ##### <-- Template from https://github.com/github/gitignore.git
+
+# Build artifacts
+www/dist/
+www/node_modules/
+pkg/

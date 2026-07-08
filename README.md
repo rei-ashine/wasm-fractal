@@ -1,4 +1,4 @@
-# [WASM-Fractal](https://Rei-Ashine.github.io/wasm-fractal/www/dist/)
+# [WASM-Fractal](https://rei-ashine.github.io/wasm-fractal/)
 
 DATE: Jan. 20th, 2023
 
