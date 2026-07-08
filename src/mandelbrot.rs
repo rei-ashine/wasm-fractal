@@ -26,10 +26,10 @@ pub fn generate_mandelbrot_set(
     // Threshold for coloring the periphery
     let threshold = (max_iter as f64 * 0.9) as u32;
 
-    for i in 0..width {
+    for i in 0..height {
         let y = y_min + (y_max - y_min) * (i as f64) / (height as f64);
 
-        for j in 0..height {
+        for j in 0..width {
             let x = x_min + (x_max - x_min) * (j as f64) / (width as f64);
 
             let c = Complex { re: x, im: y };

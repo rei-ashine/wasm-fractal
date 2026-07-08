@@ -9,5 +9,11 @@ export default defineConfig({
     topLevelAwait(),
     react()
   ],
+  worker: {
+    format: 'es',
+    plugins: [
+      wasm()
+    ]
+  },
   base: '/wasm-fractal/',
 });
