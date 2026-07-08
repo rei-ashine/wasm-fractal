@@ -12,12 +12,12 @@ const Home: React.FC = () => {
         <div className="row">
           <div className="col-sm-6 mb-4">
             <Link to="/julia">
-              <img src="/png/julia.png" width="300" height="300" className="col-sm btn-pop" alt="Julia Set" />
+              <img src={`${import.meta.env.BASE_URL}png/julia.png`} width="300" height="300" className="col-sm btn-pop" alt="Julia Set" />
             </Link>
           </div>
           <div className="col-sm-6 mb-4">
             <Link to="/mandelbrot">
-              <img src="/png/mandelbrot.png" width="300" height="300" className="col-sm btn-pop" alt="Mandelbrot Set" />
+              <img src={`${import.meta.env.BASE_URL}png/mandelbrot.png`} width="300" height="300" className="col-sm btn-pop" alt="Mandelbrot Set" />
             </Link>
           </div>
         </div>

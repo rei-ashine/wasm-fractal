@@ -41,7 +41,7 @@ const Layout: React.FC = () => {
         {!hideGithubIcon && (
           <p>
             <a href="https://github.com/rei-ashine" target="_blank" rel="noopener noreferrer">
-              <img className="ribbon btn-pop" src="/assets/GitHub-Mark-120px-plus.png" alt="GitHub" />
+              <img className="ribbon btn-pop" src={`${import.meta.env.BASE_URL}assets/GitHub-Mark-120px-plus.png`} alt="GitHub" />
             </a>
           </p>
         )}
