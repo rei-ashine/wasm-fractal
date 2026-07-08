@@ -37,9 +37,10 @@ pub fn generate_julia_set(
     max_iter: usize,
     real: f64,
     imaginary: f64,
+    aa_level: u32,
 ) -> FractalData {
     set_panic_hook();
-    let data = julia::generate_julia_set(width, height, x_min, x_max, y_min, y_max, max_iter, real, imaginary);
+    let data = julia::generate_julia_set(width, height, x_min, x_max, y_min, y_max, max_iter, real, imaginary, aa_level);
     FractalData { data }
 }
 
@@ -54,8 +55,9 @@ pub fn generate_mandelbrot_set(
     max_iter: usize,
     real: f64,
     imaginary: f64,
+    aa_level: u32,
 ) -> FractalData {
     set_panic_hook();
-    let data = mandelbrot::generate_mandelbrot_set(width, height, x_min, x_max, y_min, y_max, max_iter, real, imaginary);
+    let data = mandelbrot::generate_mandelbrot_set(width, height, x_min, x_max, y_min, y_max, max_iter, real, imaginary, aa_level);
     FractalData { data }
 }

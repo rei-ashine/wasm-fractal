@@ -12,6 +12,7 @@ export interface WorkerRequest {
   max_iter: number;
   real: number;
   imaginary: number;
+  aa_level: number;
 }
 
 export interface WorkerResponse {
@@ -37,14 +38,14 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
         req.width, req.height,
         req.x_min, req.x_max,
         req.y_min, req.y_max,
-        req.max_iter, req.real, req.imaginary
+        req.max_iter, req.real, req.imaginary, req.aa_level
       );
     } else {
       result = wasmModule.generate_julia_set(
         req.width, req.height,
         req.x_min, req.x_max,
         req.y_min, req.y_max,
-        req.max_iter, req.real, req.imaginary
+        req.max_iter, req.real, req.imaginary, req.aa_level
       );
     }
 

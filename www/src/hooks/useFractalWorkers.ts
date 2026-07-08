@@ -11,6 +11,7 @@ export interface RenderParams {
   max_iter: number;
   real: number;
   imaginary: number;
+  aa_level?: number;
 }
 
 export function useFractalWorkers() {
@@ -115,7 +116,8 @@ export function useFractalWorkers() {
           y_max: c_y_max,
           max_iter,
           real,
-          imaginary
+          imaginary,
+          aa_level: params.aa_level ?? 2
         };
 
         worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
