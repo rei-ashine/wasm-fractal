@@ -117,7 +117,7 @@ export function useFractalWorkers() {
           max_iter,
           real,
           imaginary,
-          aa_level: params.aa_level ?? 2
+          aa_level: params.aa_level ?? 3
         };
 
         worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
