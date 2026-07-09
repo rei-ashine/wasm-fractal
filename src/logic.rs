@@ -46,7 +46,6 @@ where
     F: Fn(f64, f64) -> f64,
 {
     let mut data = Vec::with_capacity((width * height * 4) as usize);
-    let threshold = max_iter as f64 * 0.9;
     
     let (base_level, fine_level) = match aa_level {
         1 => (1, 1),
@@ -79,12 +78,10 @@ where
                     if iter_index < min_iter { min_iter = iter_index; }
                     if iter_index > max_iter_val { max_iter_val = iter_index; }
 
-                    if iter_index < threshold {
-                        let color = color_map(iter_index, max_iter);
-                        r_total += color.0 as f64;
-                        g_total += color.1 as f64;
-                        b_total += color.2 as f64;
-                    }
+                    let color = color_map(iter_index, max_iter);
+                    r_total += color.0 as f64;
+                    g_total += color.1 as f64;
+                    b_total += color.2 as f64;
                 }
             }
 
@@ -107,12 +104,10 @@ where
 
                         let iter_index = calc_iter(x, y);
 
-                        if iter_index < threshold {
-                            let color = color_map(iter_index, max_iter);
-                            fine_r += color.0 as f64;
-                            fine_g += color.1 as f64;
-                            fine_b += color.2 as f64;
-                        }
+                        let color = color_map(iter_index, max_iter);
+                        fine_r += color.0 as f64;
+                        fine_g += color.1 as f64;
+                        fine_b += color.2 as f64;
                     }
                 }
                 
