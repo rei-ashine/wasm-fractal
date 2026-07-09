@@ -1,4 +1,4 @@
-use crate::logic::*;
+
 use num_complex::Complex;
 
 
@@ -40,6 +40,7 @@ pub fn generate_mandelbrot_set(
 #[cfg(test)]
 mod tests_mandelbrot {
     use super::*;
+    use crate::logic::get_n_diverged;
 
     #[test]
     fn test_get_n_diverged() {

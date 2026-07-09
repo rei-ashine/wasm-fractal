@@ -65,15 +65,19 @@ export class WorkerPool {
       worker.onmessage = (e: MessageEvent<WorkerResponse>) => {
         const res = e.data;
         this.idleWorkers.push(worker);
-        
+        // Always clear the cancelled flag to avoid memory leak
+        let wasCancelled = false;
+        if (this.cancelledJobs.has(res.id)) {
+          this.cancelledJobs.delete(res.id);
+          wasCancelled = true;
+        }
+
         const callback = this.activeJobs.get(res.id);
         if (callback) {
           this.activeJobs.delete(res.id);
           // Only fire callback if not cancelled
-          if (!this.cancelledJobs.has(res.id)) {
+          if (!wasCancelled) {
             callback(res);
-          } else {
-            this.cancelledJobs.delete(res.id);
           }
         }
         
