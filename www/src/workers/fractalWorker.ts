@@ -61,12 +61,12 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
       const dataCopy = new Uint8ClampedArray(wasmView);
       
       // Transfer the copied buffer to the main thread for zero-copy postMessage
-      (self as any).postMessage({ id: req.id, data: dataCopy } as WorkerResponse, [dataCopy.buffer]);
+      (self as unknown as DedicatedWorkerGlobalScope).postMessage({ id: req.id, data: dataCopy } as WorkerResponse, [dataCopy.buffer]);
     } finally {
       result.free();
     }
   } catch (err) {
     console.error("Worker error:", err);
-    (self as any).postMessage({ id: req.id, error: String(err) } as WorkerResponse);
+    (self as unknown as DedicatedWorkerGlobalScope).postMessage({ id: req.id, error: String(err) } as WorkerResponse);
   }
 };

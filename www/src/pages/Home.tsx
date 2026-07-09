@@ -1,38 +1,27 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useFractalWorkers } from '../hooks/useFractalWorkers';
+import { FRACTAL_CONFIG } from '../config/fractalConfig';
 
 const Home: React.FC = () => {
   const juliaRef = useRef<HTMLCanvasElement>(null);
   const mandelbrotRef = useRef<HTMLCanvasElement>(null);
-  const juliaWorkers = useFractalWorkers();
-  const mandelbrotWorkers = useFractalWorkers();
+  const juliaWorkers = useFractalWorkers('julia');
+  const mandelbrotWorkers = useFractalWorkers('mandelbrot');
 
   useEffect(() => {
     if (juliaRef.current) {
       juliaWorkers.renderFractal({
         canvas: juliaRef.current,
         type: 'julia',
-        x_min: -2.0,
-        x_max: 2.0,
-        y_min: -1.5,
-        y_max: 1.5,
-        max_iter: 1000,
-        real: -0.7269,
-        imaginary: 0.1889
+        ...FRACTAL_CONFIG.julia
       });
     }
     if (mandelbrotRef.current) {
       mandelbrotWorkers.renderFractal({
         canvas: mandelbrotRef.current,
         type: 'mandelbrot',
-        x_min: -2.0,
-        x_max: 1.0,
-        y_min: -1.0,
-        y_max: 1.0,
-        max_iter: 300,
-        real: 0.0,
-        imaginary: 0.0
+        ...FRACTAL_CONFIG.mandelbrot
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,30 +1,24 @@
 import React, { useEffect, useRef } from 'react';
 import { useFractalWorkers } from '../hooks/useFractalWorkers';
+import { FRACTAL_CONFIG } from '../config/fractalConfig';
 
 const Julia: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const workers = useFractalWorkers();
+  const workers = useFractalWorkers('julia');
 
   const draw = () => {
     if (canvasRef.current) {
       workers.renderFractal({
         canvas: canvasRef.current,
         type: 'julia',
-        x_min: -2.0,
-        x_max: 2.0,
-        y_min: -1.5,
-        y_max: 1.5,
-        max_iter: 1000,
-        real: -0.7269,
-        imaginary: 0.1889
+        ...FRACTAL_CONFIG.julia
       });
     }
   };
 
   useEffect(() => {
-    const w = window as any;
-    if (w.MathJax && w.MathJax.typesetPromise) {
-      w.MathJax.typesetPromise().catch((err: any) => console.log(err));
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      window.MathJax.typesetPromise().catch((err: any) => console.log(err));
     }
   }, []);
 

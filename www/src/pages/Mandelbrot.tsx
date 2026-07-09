@@ -1,31 +1,25 @@
 import React, { useEffect, useRef } from 'react';
 import { useFractalWorkers } from '../hooks/useFractalWorkers';
+import { FRACTAL_CONFIG } from '../config/fractalConfig';
 
 const Mandelbrot: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const workers = useFractalWorkers();
+  const workers = useFractalWorkers('mandelbrot');
 
   const draw = () => {
     if (canvasRef.current) {
       workers.renderFractal({
         canvas: canvasRef.current,
         type: 'mandelbrot',
-        x_min: -2.0,
-        x_max: 1.0,
-        y_min: -1.0,
-        y_max: 1.0,
-        max_iter: 300,
-        real: 0.0,
-        imaginary: 0.0
+        ...FRACTAL_CONFIG.mandelbrot
       });
     }
   };
 
   useEffect(() => {
     // MathJax Typesetting
-    const w = window as any;
-    if (w.MathJax && w.MathJax.typesetPromise) {
-      w.MathJax.typesetPromise().catch((err: any) => console.log(err));
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      window.MathJax.typesetPromise().catch((err: any) => console.log(err));
     }
   }, []);
 
