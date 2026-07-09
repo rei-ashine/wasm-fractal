@@ -30,6 +30,17 @@ pub fn generate_mandelbrot_set(
         max_iter,
         aa_level,
         |x, y| {
+            // Main cardioid check
+            let q = (x - 0.25) * (x - 0.25) + y * y;
+            if q * (q + (x - 0.25)) < 0.25 * y * y {
+                return max_iter as f64;
+            }
+
+            // Period-2 bulb check
+            if (x + 1.0) * (x + 1.0) + y * y < 0.0625 {
+                return max_iter as f64;
+            }
+
             let c = Complex { re: x, im: y };
             crate::logic::get_n_diverged(z_0, c, max_iter)
         },

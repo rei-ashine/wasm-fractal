@@ -7,11 +7,23 @@ pub fn get_n_diverged(z: Complex<f64>, c: Complex<f64>, max_iter: usize) -> f64 
     This function evaluates the divergence of a cell and
     returns the smoothed number of iterations up to the evaluation.
     */
-    let mut z = z;
+    let mut zx = z.re;
+    let mut zy = z.im;
+    let cx = c.re;
+    let cy = c.im;
+
+    let mut zx2 = zx * zx;
+    let mut zy2 = zy * zy;
 
     for i in 1..max_iter {
-        z = z * z + c;
-        let norm_sqr = z.norm_sqr();
+        // Optimized z = z * z + c
+        zy = 2.0 * zx * zy + cy;
+        zx = zx2 - zy2 + cx;
+
+        zx2 = zx * zx;
+        zy2 = zy * zy;
+
+        let norm_sqr = zx2 + zy2;
         if norm_sqr > 256.0 {
             // Smooth coloring formula: i + 1 - ln(ln(|z|)) / ln(2)
             // |z| = sqrt(norm_sqr), ln(|z|) = 0.5 * ln(norm_sqr)

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useFractalWorkers } from '../hooks/useFractalWorkers';
+import { typesetMathJax } from '../utils/mathjax';
 import { FRACTAL_CONFIG } from '../config/fractalConfig';
 
 const Mandelbrot: React.FC = () => {
@@ -17,10 +18,7 @@ const Mandelbrot: React.FC = () => {
   };
 
   useEffect(() => {
-    // MathJax Typesetting
-    if (window.MathJax && window.MathJax.typesetPromise) {
-      window.MathJax.typesetPromise().catch((err: any) => console.log(err));
-    }
+    typesetMathJax();
   }, []);
 
   useEffect(() => {

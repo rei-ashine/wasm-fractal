@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useFractalWorkers } from '../hooks/useFractalWorkers';
+import { typesetMathJax } from '../utils/mathjax';
 import { FRACTAL_CONFIG } from '../config/fractalConfig';
 
 const Julia: React.FC = () => {
@@ -17,9 +18,7 @@ const Julia: React.FC = () => {
   };
 
   useEffect(() => {
-    if (window.MathJax && window.MathJax.typesetPromise) {
-      window.MathJax.typesetPromise().catch((err: any) => console.log(err));
-    }
+    typesetMathJax();
   }, []);
 
   useEffect(() => {
