@@ -5,6 +5,7 @@ declare global {
     MathJax?: {
       typesetPromise: () => Promise<void>;
     };
+    dataLayer: any[];
   }
 
   interface DedicatedWorkerGlobalScope {
