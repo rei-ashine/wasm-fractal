@@ -19,6 +19,11 @@ const Terms: React.FC = () => {
         </li>
 
         <li>
+          Privacy: Your use of the website is also governed by our Privacy Policy, which details how we collect, use, and protect your data (including via Google Tag Manager).
+          By using our website, you consent to our data practices as described in the Privacy Policy.
+        </li>
+
+        <li>
           Use of content: The contents of our website, including text, graphics, logos, images, and software, are protected by copyright and trademark laws.
           You may not use any content from our website for commercial purposes without our express written consent.
         </li>

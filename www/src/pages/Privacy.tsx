@@ -19,10 +19,10 @@ const Privacy: React.FC = () => {
       </p>
 
       <p>
-        We use Google Analytics to understand how our website is used and to help us improve the user experience.
-        Google Analytics uses cookies to collect information about website usage,
+        We use Google Analytics 4 (GA4) to understand how our website is used and to help us improve the user experience.
+        GA4 may use cookies and other tracking technologies to collect information about website usage,
         including the number of visitors, the websites that referred them, and the pages they visited.
-        We do not use Google Analytics to track or collect personally identifiable information.
+        We do not use Google Analytics to track or collect personally identifiable information (PII).
       </p>
 
       <p>
@@ -40,7 +40,7 @@ const Privacy: React.FC = () => {
       </p>
 
       <p>
-        This privacy policy was last updated on January 26, 2023.
+        This privacy policy was last updated on July 13, 2026.
       </p>
       <br />
     </div>
