@@ -35,19 +35,19 @@ const Julia: React.FC = () => {
       <div className="lead mt-3">
         A complex number \( z_0 \) <br className="d-md-none" />
         is in the filled-in Julia set if,<br />
-        as \( i \) → \( \infty \), \( z_i \) does not<br className="d-md-none" />
+        as \( n \) → \( \infty \), \( z_n \) does not<br className="d-md-none" />
         diverge where :
       </div>
 
       <div className="lead">
         {`\\[
-        \\begin{cases}
-        \\begin{align}
-          \\space z_i &= z_{i-1}^2 + \\space c \\\\
-          \\\\[0.01em]
-          c \\space &= -0.7269 + 0.1889 \\space i
-        \\end{align}
-        \\end{cases}
+          \\begin{cases}
+          \\begin{align}
+            z_{n+1} &= z_n^2 + c \\\\
+            \\\\[0.01em]
+            c &= -0.7269 + 0.1889i
+          \\end{align}
+          \\end{cases}
         \\]`}
       </div>
 

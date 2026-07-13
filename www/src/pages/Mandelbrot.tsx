@@ -35,17 +35,18 @@ const Mandelbrot: React.FC = () => {
       <div className="lead mt-3">
         A complex number \( c \) <br className="d-md-none" />
         is in the Mandelbrot set if,<br />
-        as \( i \) → \( \infty \), \( z_i \) does not<br className="d-md-none" />
+        as \( n \) → \( \infty \), \( z_n \) does not<br className="d-md-none" />
         diverge where :
       </div>
 
       <div className="lead">
         {`\\[
-          z_i =
           \\begin{cases}
-            \\space z_{i-1}^2 + \\space c & (i \\geqq 1) \\\\
+          \\begin{align}
+            z_0 &= 0 \\\\
             \\\\[0.01em]
-            \\space 0 & (i = 0)
+            z_{n+1} &= z_n^2 + c
+          \\end{align}
           \\end{cases}
         \\]`}
       </div>
