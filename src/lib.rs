@@ -64,8 +64,6 @@ pub fn generate_mandelbrot_set(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     #[test]
     fn test_verify_adaptive_ssaa() {
         let width = 400;
