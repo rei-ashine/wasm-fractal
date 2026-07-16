@@ -4,6 +4,14 @@ DATE: Jul. 8th, 2026
 
 ![WASM-Fractal](./PNG/WASM-Fractal.png)
 
+## Features & Optimizations
+
+- **High-Performance Rust (WASM)**: Optimized algebraic calculations for both fractals, and early escape checks (Cardioid & Period-2 Bulb) specifically for generating the Mandelbrot set.
+- **Multithreaded Rendering**: Leverages Web Workers (`navigator.hardwareConcurrency`) for parallel rendering to keep the React UI smooth.
+- **Professional MathJax Integration**: Displays exact mathematical notations for fractals ($z_{n+1} = z_n^2 + c$) using robust React Promise chaining to prevent race conditions.
+- **Google Tag Manager (GTM) Ready**: Built-in support for GTM and GA4 analytics through strict TypeScript definitions (`global.d.ts`).
+- **Zero-Copy Data Transfer**: Uses Transferable Objects for fast pixel data transfer from Workers to the Canvas.
+
 ## Directory Structure
 
 ```text
@@ -23,6 +31,7 @@ DATE: Jul. 8th, 2026
 │   └── WASM-Fractal.png
 ├── README.md
 ├── src
+│   ├── bin
 │   ├── julia.rs
 │   ├── lib.rs
 │   ├── logic.rs
@@ -48,6 +57,8 @@ DATE: Jul. 8th, 2026
     ├── src
     │   ├── components
     │   │   └── Layout.tsx
+    │   ├── config
+    │   │   └── fractalConfig.ts
     │   ├── hooks
     │   │   └── useFractalWorkers.ts
     │   ├── main.tsx
@@ -57,10 +68,17 @@ DATE: Jul. 8th, 2026
     │   │   ├── Mandelbrot.tsx
     │   │   ├── Privacy.tsx
     │   │   └── Terms.tsx
+    │   ├── types
+    │   │   └── global.d.ts
+    │   ├── utils
+    │   │   └── mathjax.ts
     │   └── workers
-    │       └── fractalWorker.ts
+    │       ├── fractalWorker.ts
+    │       └── workerPool.ts
     ├── tsconfig.json
     └── vite.config.ts
+
+18 directories, 44 files
 ```
 
 ---
@@ -71,20 +89,17 @@ DATE: Jul. 8th, 2026
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  CSS                       1          141          132            0            9
  JSON                      3         2101         2101            0            0
- Rust                      5          342          244           46           52
+ Markdown                  2          162            0          135           27
+ Rust                      5          518          394           48           76
  TOML                      1           20           16            0            4
- TSX                       7          442          390            5           47
- TypeScript                3          262          208           11           43
+ TSX                       7          422          370            4           48
+ TypeScript                7          387          304           23           60
 ─────────────────────────────────────────────────────────────────────────────────
- HTML                      1           30           24            6            0
- |- JavaScript             1            4            4            0            0
- (Total)                               34           28            6            0
-─────────────────────────────────────────────────────────────────────────────────
- Markdown                  3          232            0          178           54
- |- BASH                   1           11            7            3            1
- (Total)                              243            7          181           55
+ HTML                      1           34           25            9            0
+ |- JavaScript             1            5            5            0            0
+ (Total)                               39           30            9            0
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- Total                    24         3585         3126          249          210
+ Total                    27         3790         3347          219          224
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
