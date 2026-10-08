@@ -123,8 +123,15 @@ img.ribbon {
 .btn-pop i {
   line-height: 3.5rem;
 }
-.btn-pop:hover {
-  box-shadow: 20px 20px 60px #333, -20px -20px 60px #fff;
+/* Touch devices keep :hover stuck after a tap, so only pop on real pointers */
+@media (hover: hover) and (pointer: fine) {
+  .btn-pop:hover {
+    box-shadow: 20px 20px 60px #333, -20px -20px 60px #fff;
+  }
+}
+/* Fill sub-pixel gaps between the canvas and its shadow with dark, not the white page */
+canvas.btn-pop {
+  background-color: #000;
 }
 
 .marker {
