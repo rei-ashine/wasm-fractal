@@ -16,5 +16,15 @@ export const FRACTAL_CONFIG = {
     max_iter: 300,
     real: 0.0,
     imaginary: 0.0
+  },
+  burningShip: {
+    x_min: -2.1,
+    x_max: 1.2,
+    y_min: -2.3,
+    y_max: 1.0,
+    max_iter: 300,
+    // z_0 is fixed at 0; kept so the config matches RenderParams
+    real: 0.0,
+    imaginary: 0.0
   }
 } as const;

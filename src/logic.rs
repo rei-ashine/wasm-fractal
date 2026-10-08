@@ -35,6 +35,39 @@ pub fn get_n_diverged(z: Complex<f64>, c: Complex<f64>, max_iter: usize) -> f64 
     max_iter as f64
 }
 
+pub fn get_n_diverged_burning_ship(c: Complex<f64>, max_iter: usize) -> f64 {
+    /*
+    This function evaluates the divergence of a cell for the Burning Ship
+    fractal, z_{n+1} = (|Re z_n| + i|Im z_n|)^2 + c with z_0 = 0, and
+    returns the smoothed number of iterations up to the evaluation.
+    */
+    let mut zx = 0.0_f64;
+    let mut zy = 0.0_f64;
+    let cx = c.re;
+    let cy = c.im;
+
+    let mut zx2 = 0.0;
+    let mut zy2 = 0.0;
+
+    for i in 1..max_iter {
+        // (|x| + i|y|)^2 = x^2 - y^2 + 2i|xy|
+        zy = 2.0 * (zx * zy).abs() + cy;
+        zx = zx2 - zy2 + cx;
+
+        zx2 = zx * zx;
+        zy2 = zy * zy;
+
+        let norm_sqr = zx2 + zy2;
+        if norm_sqr > 256.0 {
+            // Degree 2, so the same smooth coloring as get_n_diverged applies
+            let log_z = 0.5 * norm_sqr.ln();
+            let nu = log_z.ln() / LN_2;
+            return (i as f64) + 1.0 - nu;
+        }
+    }
+    max_iter as f64
+}
+
 pub fn color_map(iter_index: f64, max_iter: usize) -> (u8, u8, u8) {
     let t = iter_index / (max_iter as f64);
     let r = (15.0 * (1.0 - t) * t * t * t * 255.0) as u8;

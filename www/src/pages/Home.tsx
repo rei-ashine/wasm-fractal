@@ -6,8 +6,10 @@ import { FRACTAL_CONFIG } from '../config/fractalConfig';
 const Home: React.FC = () => {
   const juliaRef = useRef<HTMLCanvasElement>(null);
   const mandelbrotRef = useRef<HTMLCanvasElement>(null);
+  const burningShipRef = useRef<HTMLCanvasElement>(null);
   const juliaWorkers = useFractalWorkers('julia');
   const mandelbrotWorkers = useFractalWorkers('mandelbrot');
+  const burningShipWorkers = useFractalWorkers('burningShip');
 
   useEffect(() => {
     if (juliaRef.current) {
@@ -22,6 +24,13 @@ const Home: React.FC = () => {
         canvas: mandelbrotRef.current,
         type: 'mandelbrot',
         ...FRACTAL_CONFIG.mandelbrot
+      });
+    }
+    if (burningShipRef.current) {
+      burningShipWorkers.renderFractal({
+        canvas: burningShipRef.current,
+        type: 'burningShip',
+        ...FRACTAL_CONFIG.burningShip
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,6 +65,18 @@ const Home: React.FC = () => {
               />
               <p className="text-muted mt-2" style={{fontSize: '0.8rem'}}>
                 {mandelbrotWorkers.isRendering ? 'Rendering...' : (mandelbrotWorkers.elapsed !== null ? `Rendered in ${mandelbrotWorkers.elapsed} ms` : '')}
+              </p>
+            </Link>
+          </div>
+          <div className="col-sm-6 mb-4">
+            <Link to="/burning-ship" style={{ textDecoration: 'none' }}>
+              <canvas 
+                ref={burningShipRef} 
+                className="col-sm btn-pop" 
+                style={{ width: '300px', height: '300px', borderRadius: '5px' }} 
+              />
+              <p className="text-muted mt-2" style={{fontSize: '0.8rem'}}>
+                {burningShipWorkers.isRendering ? 'Rendering...' : (burningShipWorkers.elapsed !== null ? `Rendered in ${burningShipWorkers.elapsed} ms` : '')}
               </p>
             </Link>
           </div>

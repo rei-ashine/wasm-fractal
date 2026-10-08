@@ -1,4 +1,4 @@
-export type FractalType = 'mandelbrot' | 'julia';
+export type FractalType = 'mandelbrot' | 'julia' | 'burningShip';
 
 export interface WorkerRequest {
   id: number;
@@ -39,6 +39,13 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
         req.x_min, req.x_max,
         req.y_min, req.y_max,
         req.max_iter, req.real, req.imaginary, req.aa_level
+      );
+    } else if (req.type === 'burningShip') {
+      result = wasmModule.generate_burning_ship(
+        req.width, req.height,
+        req.x_min, req.x_max,
+        req.y_min, req.y_max,
+        req.max_iter, req.aa_level
       );
     } else {
       result = wasmModule.generate_julia_set(
