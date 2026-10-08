@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { useFractalWorkers } from '../hooks/useFractalWorkers';
-import { typesetMathJax } from '../utils/mathjax';
+import { useMathJax } from '../hooks/useMathJax';
 import { FRACTAL_CONFIG } from '../config/fractalConfig';
 
 const BurningShip: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const workers = useFractalWorkers('burningShip');
+  const workers = useFractalWorkers();
+  const mathRef = useMathJax<HTMLDivElement>();
 
   const draw = () => {
     if (canvasRef.current) {
@@ -18,10 +19,6 @@ const BurningShip: React.FC = () => {
   };
 
   useEffect(() => {
-    typesetMathJax();
-  }, []);
-
-  useEffect(() => {
     draw();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -32,23 +29,25 @@ const BurningShip: React.FC = () => {
         <h1 className="display-4">Burning Ship</h1>
       </div>
 
-      <div className="lead mt-3">
-        A complex number \( c \) <br className="d-md-none" />
-        is in the Burning Ship fractal if,<br />
-        as \( n \) → \( \infty \), \( z_n \) does not<br className="d-md-none" />
-        diverge where :
-      </div>
+      <div ref={mathRef}>
+        <div className="lead mt-3">
+          A complex number \( c \) <br className="d-md-none" />
+          is in the Burning Ship fractal if,<br />
+          as \( n \) → \( \infty \), \( z_n \) does not<br className="d-md-none" />
+          diverge where :
+        </div>
 
-      <div className="lead">
-        {`\\[
-          \\begin{cases}
-          \\begin{align}
-            z_0 &= 0 \\\\
-            \\\\[0.01em]
-            z_{n+1} &= \\left( |\\mathrm{Re}\\,z_n| + i\\,|\\mathrm{Im}\\,z_n| \\right)^2 + c
-          \\end{align}
-          \\end{cases}
-        \\]`}
+        <div className="lead">
+          {`\\[
+            \\begin{cases}
+            \\begin{align}
+              z_0 &= 0 \\\\
+              \\\\[0.01em]
+              z_{n+1} &= \\left( |\\mathrm{Re}\\,z_n| + i\\,|\\mathrm{Im}\\,z_n| \\right)^2 + c
+            \\end{align}
+            \\end{cases}
+          \\]`}
+        </div>
       </div>
 
       <div className="mt-3">

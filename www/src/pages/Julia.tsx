@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { useFractalWorkers } from '../hooks/useFractalWorkers';
-import { typesetMathJax } from '../utils/mathjax';
+import { useMathJax } from '../hooks/useMathJax';
 import { FRACTAL_CONFIG } from '../config/fractalConfig';
 
 const Julia: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const workers = useFractalWorkers('julia');
+  const workers = useFractalWorkers();
+  const mathRef = useMathJax<HTMLDivElement>();
 
   const draw = () => {
     if (canvasRef.current) {
@@ -18,10 +19,6 @@ const Julia: React.FC = () => {
   };
 
   useEffect(() => {
-    typesetMathJax();
-  }, []);
-
-  useEffect(() => {
     draw();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -32,23 +29,25 @@ const Julia: React.FC = () => {
         <h1 className="display-4">Julia Set</h1>
       </div>
 
-      <div className="lead mt-3">
-        A complex number \( z_0 \) <br className="d-md-none" />
-        is in the filled-in Julia set if,<br />
-        as \( n \) → \( \infty \), \( z_n \) does not<br className="d-md-none" />
-        diverge where :
-      </div>
+      <div ref={mathRef}>
+        <div className="lead mt-3">
+          A complex number \( z_0 \) <br className="d-md-none" />
+          is in the filled-in Julia set if,<br />
+          as \( n \) → \( \infty \), \( z_n \) does not<br className="d-md-none" />
+          diverge where :
+        </div>
 
-      <div className="lead">
-        {`\\[
-          \\begin{cases}
-          \\begin{align}
-            z_{n+1} &= z_n^2 + c \\\\
-            \\\\[0.01em]
-            c &= -0.7269 + 0.1889i
-          \\end{align}
-          \\end{cases}
-        \\]`}
+        <div className="lead">
+          {`\\[
+            \\begin{cases}
+            \\begin{align}
+              z_{n+1} &= z_n^2 + c \\\\
+              \\\\[0.01em]
+              c &= -0.7269 + 0.1889i
+            \\end{align}
+            \\end{cases}
+          \\]`}
+        </div>
       </div>
 
       <div className="mt-3">

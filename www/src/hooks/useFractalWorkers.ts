@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useId } from 'react';
 import { FractalType, WorkerRequest } from '../workers/fractalWorker';
 import { getWorkerPool } from '../workers/workerPool';
 
@@ -17,34 +17,39 @@ export interface RenderParams {
 
 let globalJobIdCounter = 0;
 
-export function useFractalWorkers(poolId: string) {
+export function useFractalWorkers() {
   const [elapsed, setElapsed] = useState<number | null>(null);
   const [isRendering, setIsRendering] = useState<boolean>(false);
+  // Jobs from this hook form one group in the shared pool, so cancelling them
+  // does not affect other canvases rendering at the same time.
+  const group = useId();
 
   // When unmounting, we should cancel any pending jobs.
   useEffect(() => {
     return () => {
-      const pool = getWorkerPool(poolId);
-      pool.cancelAll();
+      getWorkerPool().cancelGroup(group);
     };
-  }, [poolId]);
+  }, [group]);
 
   const cancelRendering = useCallback(() => {
-    const pool = getWorkerPool(poolId);
-    pool.cancelAll();
+    getWorkerPool().cancelGroup(group);
     setIsRendering(false);
-  }, [poolId]);
+  }, [group]);
 
   const renderFractal = useCallback((params: RenderParams) => {
     cancelRendering();
+
+    const { canvas, type, x_min, x_max, y_min, y_max, max_iter, real, imaginary } = params;
+    const ctx = canvas.getContext('2d', { alpha: false });
+    if (!ctx) {
+      console.warn('2D canvas context is not available');
+      return;
+    }
 
     setElapsed(null);
     setIsRendering(true);
     
     const start_time = performance.now();
-    const { canvas, type, x_min, x_max, y_min, y_max, max_iter, real, imaginary } = params;
-    const ctx = canvas.getContext('2d', { alpha: false });
-    if (!ctx) return;
 
     // Device Pixel Ratio for Retina screens
     const dpr = window.devicePixelRatio || 1;
@@ -65,7 +70,7 @@ export function useFractalWorkers(poolId: string) {
     const totalChunks = chunksX * chunksY;
     let chunksCompleted = 0;
 
-    const pool = getWorkerPool(poolId);
+    const pool = getWorkerPool();
 
     for (let cy = 0; cy < chunksY; cy++) {
       for (let cx = 0; cx < chunksX; cx++) {
@@ -99,7 +104,10 @@ export function useFractalWorkers(poolId: string) {
           aa_level: params.aa_level ?? 3
         };
 
-        pool.submitTask(req).then((res) => {
+        pool.submitTask(req, group).then((res) => {
+          // null means this render was cancelled; a newer render owns the canvas now
+          if (res === null) return;
+
           if (res.error) {
             console.warn(`Chunk ${res.id} failed:`, res.error);
           } else if (res.data) {
@@ -115,7 +123,7 @@ export function useFractalWorkers(poolId: string) {
         });
       }
     }
-  }, [cancelRendering, poolId]);
+  }, [cancelRendering, group]);
 
   return { renderFractal, cancelRendering, elapsed, isRendering };
 }

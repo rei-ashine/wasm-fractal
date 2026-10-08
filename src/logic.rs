@@ -15,7 +15,7 @@ pub fn get_n_diverged(z: Complex<f64>, c: Complex<f64>, max_iter: usize) -> f64 
     let mut zx2 = zx * zx;
     let mut zy2 = zy * zy;
 
-    for i in 1..max_iter {
+    for i in 1..=max_iter {
         // Optimized z = z * z + c
         zy = 2.0 * zx * zy + cy;
         zx = zx2 - zy2 + cx;
@@ -49,7 +49,7 @@ pub fn get_n_diverged_burning_ship(c: Complex<f64>, max_iter: usize) -> f64 {
     let mut zx2 = 0.0;
     let mut zy2 = 0.0;
 
-    for i in 1..max_iter {
+    for i in 1..=max_iter {
         // (|x| + i|y|)^2 = x^2 - y^2 + 2i|xy|
         zy = 2.0 * (zx * zy).abs() + cy;
         zx = zx2 - zy2 + cx;

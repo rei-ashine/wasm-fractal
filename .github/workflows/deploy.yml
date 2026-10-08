@@ -31,12 +31,16 @@ jobs:
           targets: wasm32-unknown-unknown
 
       - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        # wasm-pack moved from the rustwasm org to wasm-bindgen; install the pinned crate
+        run: cargo install wasm-pack --version 0.15.0 --locked
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
+
+      - name: Test Rust
+        run: cargo test --release
 
       - name: Build Wasm
         run: wasm-pack build --target bundler
@@ -45,6 +49,7 @@ jobs:
         working-directory: ./www
         run: |
           npm ci
+          npx tsc --noEmit
           npm run build
 
       - name: Setup Pages

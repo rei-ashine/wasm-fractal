@@ -7,9 +7,9 @@ const Home: React.FC = () => {
   const juliaRef = useRef<HTMLCanvasElement>(null);
   const mandelbrotRef = useRef<HTMLCanvasElement>(null);
   const burningShipRef = useRef<HTMLCanvasElement>(null);
-  const juliaWorkers = useFractalWorkers('julia');
-  const mandelbrotWorkers = useFractalWorkers('mandelbrot');
-  const burningShipWorkers = useFractalWorkers('burningShip');
+  const juliaWorkers = useFractalWorkers();
+  const mandelbrotWorkers = useFractalWorkers();
+  const burningShipWorkers = useFractalWorkers();
 
   useEffect(() => {
     if (juliaRef.current) {
