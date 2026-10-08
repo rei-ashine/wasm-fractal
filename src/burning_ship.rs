@@ -82,10 +82,10 @@ mod tests_burning_ship {
         let width = 400;
         let height = 400;
 
-        let x_min = -2.1;
-        let x_max = 1.2;
-        let y_min = -2.3;
-        let y_max = 1.0;
+        let x_min = -1.8;
+        let x_max = -1.6;
+        let y_min = -0.1;
+        let y_max = 0.1;
         let max_iter = 300;
         let aa_level = 1;
 
