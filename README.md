@@ -6,7 +6,7 @@ DATE: Jul. 8th, 2026
 
 ## Features & Optimizations
 
-- **High-Performance Rust (WASM)**: Optimized algebraic calculations for both fractals, and early escape checks (Cardioid & Period-2 Bulb) specifically for generating the Mandelbrot set.
+- **High-Performance Rust (WASM)**: Optimized algebraic calculations for the Julia set, the Mandelbrot set and the Burning Ship fractal, and early escape checks (Cardioid & Period-2 Bulb) specifically for generating the Mandelbrot set.
 - **Multithreaded Rendering**: Leverages Web Workers (`navigator.hardwareConcurrency`) for parallel rendering to keep the React UI smooth.
 - **Professional MathJax Integration**: Displays exact mathematical notations for fractals ($z_{n+1} = z_n^2 + c$) using robust React Promise chaining to prevent race conditions.
 - **Google Tag Manager (GTM) Ready**: Built-in support for GTM and GA4 analytics through strict TypeScript definitions (`global.d.ts`).
@@ -32,6 +32,7 @@ DATE: Jul. 8th, 2026
 ├── README.md
 ├── src
 │   ├── bin
+│   ├── burning_ship.rs
 │   ├── julia.rs
 │   ├── lib.rs
 │   ├── logic.rs
@@ -63,6 +64,7 @@ DATE: Jul. 8th, 2026
     │   │   └── useFractalWorkers.ts
     │   ├── main.tsx
     │   ├── pages
+    │   │   ├── BurningShip.tsx
     │   │   ├── Home.tsx
     │   │   ├── Julia.tsx
     │   │   ├── Mandelbrot.tsx

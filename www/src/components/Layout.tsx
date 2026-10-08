@@ -16,6 +16,7 @@ const Layout: React.FC = () => {
             <Link to="/" onClick={() => setMenuOpen(false)}><span className="marker">Gallery</span></Link>
             <Link to="/julia" onClick={() => setMenuOpen(false)}><span className="marker">Julia Set</span></Link>
             <Link to="/mandelbrot" onClick={() => setMenuOpen(false)}><span className="marker">Mandelbrot Set</span></Link>
+            <Link to="/burning-ship" onClick={() => setMenuOpen(false)}><span className="marker">Burning Ship</span></Link>
           </div>
         </div>
       </header>
