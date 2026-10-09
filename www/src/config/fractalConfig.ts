@@ -27,5 +27,15 @@ export const FRACTAL_CONFIG = {
     // z_0 is fixed at 0; kept so the config matches RenderParams
     real: 0.0,
     imaginary: 0.0
+  },
+  celticMandelbrot: {
+    x_min: -2.0,
+    x_max: 2.0,
+    y_min: -2.0,
+    y_max: 2.0,
+    max_iter: 300,
+    // z_0 is fixed at 0; kept so the config matches RenderParams
+    real: 0.0,
+    imaginary: 0.0
   }
 } as const;
