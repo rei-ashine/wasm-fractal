@@ -7,9 +7,11 @@ const Home: React.FC = () => {
   const juliaRef = useRef<HTMLCanvasElement>(null);
   const mandelbrotRef = useRef<HTMLCanvasElement>(null);
   const burningShipRef = useRef<HTMLCanvasElement>(null);
+  const celticMandelbrotRef = useRef<HTMLCanvasElement>(null);
   const juliaWorkers = useFractalWorkers();
   const mandelbrotWorkers = useFractalWorkers();
   const burningShipWorkers = useFractalWorkers();
+  const celticMandelbrotWorkers = useFractalWorkers();
 
   useEffect(() => {
     if (juliaRef.current) {
@@ -31,6 +33,13 @@ const Home: React.FC = () => {
         canvas: burningShipRef.current,
         type: 'burningShip',
         ...FRACTAL_CONFIG.burningShip
+      });
+    }
+    if (celticMandelbrotRef.current) {
+      celticMandelbrotWorkers.renderFractal({
+        canvas: celticMandelbrotRef.current,
+        type: 'celticMandelbrot',
+        ...FRACTAL_CONFIG.celticMandelbrot
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,6 +86,18 @@ const Home: React.FC = () => {
               />
               <p className="text-muted mt-2" style={{fontSize: '0.8rem'}}>
                 {burningShipWorkers.isRendering ? 'Rendering...' : (burningShipWorkers.elapsed !== null ? `Rendered in ${burningShipWorkers.elapsed} ms` : '')}
+              </p>
+            </Link>
+          </div>
+          <div className="col-sm-6 mb-4">
+            <Link to="/celtic-mandelbrot" style={{ textDecoration: 'none' }}>
+              <canvas 
+                ref={celticMandelbrotRef} 
+                className="col-sm btn-pop" 
+                style={{ width: '300px', height: '300px', borderRadius: '5px' }} 
+              />
+              <p className="text-muted mt-2" style={{fontSize: '0.8rem'}}>
+                {celticMandelbrotWorkers.isRendering ? 'Rendering...' : (celticMandelbrotWorkers.elapsed !== null ? `Rendered in ${celticMandelbrotWorkers.elapsed} ms` : '')}
               </p>
             </Link>
           </div>

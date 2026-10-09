@@ -3,6 +3,7 @@ mod logic;
 mod julia;
 mod mandelbrot;
 mod burning_ship;
+mod celtic_mandelbrot;
 use utils::set_panic_hook;
 use wasm_bindgen::prelude::*;
 
@@ -76,6 +77,22 @@ pub fn generate_burning_ship(
 ) -> FractalData {
     set_panic_hook();
     let data = burning_ship::generate_burning_ship(width, height, x_min, x_max, y_min, y_max, max_iter, aa_level);
+    FractalData { data }
+}
+
+#[wasm_bindgen]
+pub fn generate_celtic_mandelbrot(
+    width: u32,
+    height:u32,
+    x_min: f64,
+    x_max: f64,
+    y_min: f64,
+    y_max: f64,
+    max_iter: usize,
+    aa_level: u32,
+) -> FractalData {
+    set_panic_hook();
+    let data = celtic_mandelbrot::generate_celtic_mandelbrot(width, height, x_min, x_max, y_min, y_max, max_iter, aa_level);
     FractalData { data }
 }
 
