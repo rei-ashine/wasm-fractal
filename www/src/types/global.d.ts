@@ -3,7 +3,8 @@ export {};
 declare global {
   interface Window {
     MathJax?: {
-      typesetPromise: () => Promise<void>;
+      typesetPromise: (elements?: (HTMLElement | string)[]) => Promise<void>;
+      typesetClear?: (elements?: (HTMLElement | string)[]) => void;
     };
     dataLayer: any[];
   }
