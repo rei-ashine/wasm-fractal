@@ -1,0 +1,26 @@
+name: Test
+
+# Run the Rust tests on every branch except main (main runs them in deploy.yml),
+# so changes are checked before they are merged and deployed.
+on:
+  push:
+    branches-ignore:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Test Rust
+        # test-fast: release optimizations without LTO (see Cargo.toml)
+        run: cargo test --profile test-fast
