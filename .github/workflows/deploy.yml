@@ -51,7 +51,8 @@ jobs:
           node-version: '24'
 
       - name: Test Rust
-        run: cargo test --release
+        # test-fast: release optimizations without LTO (see Cargo.toml)
+        run: cargo test --profile test-fast
 
       - name: Build Wasm
         run: wasm-pack build --target bundler
