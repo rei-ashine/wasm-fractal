@@ -4,6 +4,8 @@ mod julia;
 mod mandelbrot;
 mod burning_ship;
 mod celtic_mandelbrot;
+use logic::View;
+use num_complex::Complex;
 use utils::set_panic_hook;
 use wasm_bindgen::prelude::*;
 
@@ -28,10 +30,26 @@ pub fn get_memory() -> JsValue {
     wasm_bindgen::memory()
 }
 
+/// The fractals this crate can render. On the JS side this is the string union
+/// "mandelbrot" | "julia" | "burningShip" | "celticMandelbrot".
 #[wasm_bindgen]
-pub fn generate_julia_set(
+#[derive(Clone, Copy, Debug)]
+pub enum FractalKind {
+    Mandelbrot = "mandelbrot",
+    Julia = "julia",
+    BurningShip = "burningShip",
+    CelticMandelbrot = "celticMandelbrot",
+}
+
+/// Renders one fractal over [x_min, x_max] x [y_min, y_max] as RGBA bytes.
+///
+/// `real` and `imaginary` are z_0 for the Mandelbrot set and c for the Julia set;
+/// the Burning Ship and the Celtic Mandelbrot set always start from z_0 = 0 and ignore them.
+#[wasm_bindgen]
+pub fn generate_fractal(
+    kind: FractalKind,
     width: u32,
-    height:u32,
+    height: u32,
     x_min: f64,
     x_max: f64,
     y_min: f64,
@@ -42,77 +60,43 @@ pub fn generate_julia_set(
     aa_level: u32,
 ) -> FractalData {
     set_panic_hook();
-    let data = julia::generate_julia_set(width, height, x_min, x_max, y_min, y_max, max_iter, real, imaginary, aa_level);
-    FractalData { data }
-}
-
-#[wasm_bindgen]
-pub fn generate_mandelbrot_set(
-    width: u32,
-    height:u32,
-    x_min: f64,
-    x_max: f64,
-    y_min: f64,
-    y_max: f64,
-    max_iter: usize,
-    real: f64,
-    imaginary: f64,
-    aa_level: u32,
-) -> FractalData {
-    set_panic_hook();
-    let data = mandelbrot::generate_mandelbrot_set(width, height, x_min, x_max, y_min, y_max, max_iter, real, imaginary, aa_level);
-    FractalData { data }
-}
-
-#[wasm_bindgen]
-pub fn generate_burning_ship(
-    width: u32,
-    height:u32,
-    x_min: f64,
-    x_max: f64,
-    y_min: f64,
-    y_max: f64,
-    max_iter: usize,
-    aa_level: u32,
-) -> FractalData {
-    set_panic_hook();
-    let data = burning_ship::generate_burning_ship(width, height, x_min, x_max, y_min, y_max, max_iter, aa_level);
-    FractalData { data }
-}
-
-#[wasm_bindgen]
-pub fn generate_celtic_mandelbrot(
-    width: u32,
-    height:u32,
-    x_min: f64,
-    x_max: f64,
-    y_min: f64,
-    y_max: f64,
-    max_iter: usize,
-    aa_level: u32,
-) -> FractalData {
-    set_panic_hook();
-    let data = celtic_mandelbrot::generate_celtic_mandelbrot(width, height, x_min, x_max, y_min, y_max, max_iter, aa_level);
+    let view = View { width, height, x_min, x_max, y_min, y_max, max_iter, aa_level };
+    let param = Complex { re: real, im: imaginary };
+    let data = match kind {
+        FractalKind::Mandelbrot => mandelbrot::generate_mandelbrot_set(&view, param),
+        FractalKind::Julia => julia::generate_julia_set(&view, param),
+        FractalKind::BurningShip => burning_ship::generate_burning_ship(&view),
+        FractalKind::CelticMandelbrot => celtic_mandelbrot::generate_celtic_mandelbrot(&view),
+        // wasm-bindgen maps a string that is not one of the variants above to this
+        // hidden variant. Matching it by name (not with `_`) keeps the match exhaustive,
+        // so a new variant without an arm fails to compile.
+        FractalKind::__Invalid => wasm_bindgen::throw_str("Unknown fractal kind"),
+    };
     FractalData { data }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::logic::View;
+    use num_complex::Complex;
+
     #[test]
     fn test_verify_adaptive_ssaa() {
         let width = 400;
         let height = 400;
-        let x_min = -0.75;
-        let x_max = -0.73;
-        let y_min = 0.1;
-        let y_max = 0.12;
-        let max_iter = 500;
-        let real = 0.0;
-        let imaginary = 0.0;
+        let view = View {
+            width, height,
+            x_min: -0.75, x_max: -0.73,
+            y_min: 0.1, y_max: 0.12,
+            max_iter: 500,
+            aa_level: 0,
+        };
+        let z_0 = Complex { re: 0.0, im: 0.0 };
+        let with_aa = |aa_level| crate::mandelbrot::generate_mandelbrot_set(&View { aa_level, ..view }, z_0);
 
-        let img_base = crate::mandelbrot::generate_mandelbrot_set(width, height, x_min, x_max, y_min, y_max, max_iter, real, imaginary, 2);
-        let img_adaptive = crate::mandelbrot::generate_mandelbrot_set(width, height, x_min, x_max, y_min, y_max, max_iter, real, imaginary, 3);
-        let img_ultra = crate::mandelbrot::generate_mandelbrot_set(width, height, x_min, x_max, y_min, y_max, max_iter, real, imaginary, 4);
+        let img_base = with_aa(2);
+        let img_adaptive = with_aa(3);
+        let img_ultra = with_aa(4);
 
         let mut diff_pixels_3 = 0;
         let mut diff_pixels_4 = 0;

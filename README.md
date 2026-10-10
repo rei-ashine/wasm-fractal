@@ -12,6 +12,12 @@ DATE: Jul. 8th, 2026
 - **Google Tag Manager (GTM) Ready**: Built-in support for GTM and GA4 analytics through strict TypeScript definitions (`global.d.ts`).
 - **Zero-Copy Data Transfer**: Uses Transferable Objects for fast pixel data transfer from Workers to the Canvas.
 
+## Adding a Fractal
+
+1. In Rust, add a module with its iteration (a step for `logic::escape_time`) and a `generate_*` function that passes it to `logic::render_fractal`.
+2. Add a variant to `FractalKind` in `src/lib.rs` and its arm in `generate_fractal`. The variant's string becomes the fractal's `type` on the JS side.
+3. Add an entry to `FRACTALS` in `www/src/config/fractalConfig.ts`. Its gallery card, menu link and page are generated from it.
+
 ## Directory Structure
 
 ```text
@@ -58,18 +64,17 @@ DATE: Jul. 8th, 2026
     ├── README.md
     ├── src
     │   ├── components
+    │   │   ├── FractalCanvas.tsx
     │   │   └── Layout.tsx
     │   ├── config
     │   │   └── fractalConfig.ts
     │   ├── hooks
-    │   │   └── useFractalWorkers.ts
+    │   │   ├── useFractalWorkers.ts
+    │   │   └── useMathJax.ts
     │   ├── main.tsx
     │   ├── pages
-    │   │   ├── BurningShip.tsx
-    │   │   ├── CelticMandelbrot.tsx
+    │   │   ├── FractalPage.tsx
     │   │   ├── Home.tsx
-    │   │   ├── Julia.tsx
-    │   │   ├── Mandelbrot.tsx
     │   │   ├── Privacy.tsx
     │   │   └── Terms.tsx
     │   ├── types
@@ -82,7 +87,7 @@ DATE: Jul. 8th, 2026
     ├── tsconfig.json
     └── vite.config.ts
 
-18 directories, 44 files
+18 directories, 43 files
 ```
 
 ---

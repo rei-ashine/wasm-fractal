@@ -1,46 +1,23 @@
 
 use num_complex::Complex;
+use crate::logic::{get_n_diverged, render_fractal, View};
 
 
-pub fn generate_julia_set(
+pub fn generate_julia_set(view: &View, c: Complex<f64>) -> Vec<u8> {
     /*
     This function stores color information about each cell.
     */
-    width: u32,
-    height:u32,
-    x_min: f64,
-    x_max: f64,
-    y_min: f64,
-    y_max: f64,
-    max_iter: usize,
-    real: f64,
-    imaginary: f64,
-    aa_level: u32,
-) -> Vec<u8> {
-    // Initial value of c
-    let c = Complex { re: real, im: imaginary };
-
-    crate::logic::render_fractal(
-        width,
-        height,
-        x_min,
-        x_max,
-        y_min,
-        y_max,
-        max_iter,
-        aa_level,
-        |x, y| {
-            let z = Complex { re: x, im: y };
-            crate::logic::get_n_diverged(z, c, max_iter)
-        },
-    )
+    let max_iter = view.max_iter;
+    render_fractal(view, |x, y| {
+        let z = Complex { re: x, im: y };
+        get_n_diverged(z, c, max_iter)
+    })
 }
 
 
 #[cfg(test)]
 mod tests_julia{
     use super::*;
-    use crate::logic::get_n_diverged;
 
     #[test]
     fn test_get_n_diverged() {
@@ -103,20 +80,19 @@ mod tests_julia{
         //let width = 400;
         //let height = 400;
 
-        let x_min = -2.0;
-        let x_max = 2.0;
-        let y_min = -1.5;
-        let y_max = 1.5;
-        let max_iter = 1000;
-        let aa_level = 1;
+        let view = View {
+            width, height,
+            x_min: -2.0, x_max: 2.0,
+            y_min: -1.5, y_max: 1.5,
+            max_iter: 1000,
+            aa_level: 1,
+        };
 
         // Initial value of c
-        let real = -0.7269;
-        let imaginary = 0.1889;
-        //let real = -0.4;
-        //let imaginary = 0.6;
+        let c = Complex { re: -0.7269, im: 0.1889 };
+        //let c = Complex { re: -0.4, im: 0.6 };
 
-        let data = generate_julia_set(width, height, x_min, x_max, y_min, y_max, max_iter, real, imaginary, aa_level);
+        let data = generate_julia_set(&view, c);
         assert_eq!(data.len() as u32, width * height * 4);
         assert_eq!(type_of(&data), "&alloc::vec::Vec<u8>");
 
