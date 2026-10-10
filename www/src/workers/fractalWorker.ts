@@ -1,4 +1,7 @@
-export type FractalType = 'mandelbrot' | 'julia' | 'burningShip' | 'celticMandelbrot';
+import type { FractalKind } from 'wasm-fractal';
+
+// Generated from the Rust FractalKind enum, so the two cannot drift apart
+export type FractalType = FractalKind;
 
 export interface WorkerRequest {
   id: number;
@@ -10,6 +13,7 @@ export interface WorkerRequest {
   y_min: number;
   y_max: number;
   max_iter: number;
+  // z_0 for the Mandelbrot set, c for the Julia set; ignored by the other fractals
   real: number;
   imaginary: number;
   aa_level: number;
@@ -32,36 +36,13 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
       wasmModule = await import('wasm-fractal');
     }
     
-    let result;
-    if (req.type === 'mandelbrot') {
-      result = wasmModule.generate_mandelbrot_set(
-        req.width, req.height,
-        req.x_min, req.x_max,
-        req.y_min, req.y_max,
-        req.max_iter, req.real, req.imaginary, req.aa_level
-      );
-    } else if (req.type === 'burningShip') {
-      result = wasmModule.generate_burning_ship(
-        req.width, req.height,
-        req.x_min, req.x_max,
-        req.y_min, req.y_max,
-        req.max_iter, req.aa_level
-      );
-    } else if (req.type === 'celticMandelbrot') {
-      result = wasmModule.generate_celtic_mandelbrot(
-        req.width, req.height,
-        req.x_min, req.x_max,
-        req.y_min, req.y_max,
-        req.max_iter, req.aa_level
-      );
-    } else {
-      result = wasmModule.generate_julia_set(
-        req.width, req.height,
-        req.x_min, req.x_max,
-        req.y_min, req.y_max,
-        req.max_iter, req.real, req.imaginary, req.aa_level
-      );
-    }
+    const result = wasmModule.generate_fractal(
+      req.type,
+      req.width, req.height,
+      req.x_min, req.x_max,
+      req.y_min, req.y_max,
+      req.max_iter, req.real, req.imaginary, req.aa_level
+    );
 
     try {
       const memory = wasmModule.get_memory();
