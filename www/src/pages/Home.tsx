@@ -1,50 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { useFractalWorkers } from '../hooks/useFractalWorkers';
-import { FRACTAL_CONFIG } from '../config/fractalConfig';
+import FractalCanvas from '../components/FractalCanvas';
+import { FRACTALS } from '../config/fractalConfig';
 
 const Home: React.FC = () => {
-  const juliaRef = useRef<HTMLCanvasElement>(null);
-  const mandelbrotRef = useRef<HTMLCanvasElement>(null);
-  const burningShipRef = useRef<HTMLCanvasElement>(null);
-  const celticMandelbrotRef = useRef<HTMLCanvasElement>(null);
-  const juliaWorkers = useFractalWorkers();
-  const mandelbrotWorkers = useFractalWorkers();
-  const burningShipWorkers = useFractalWorkers();
-  const celticMandelbrotWorkers = useFractalWorkers();
-
-  useEffect(() => {
-    if (juliaRef.current) {
-      juliaWorkers.renderFractal({
-        canvas: juliaRef.current,
-        type: 'julia',
-        ...FRACTAL_CONFIG.julia
-      });
-    }
-    if (mandelbrotRef.current) {
-      mandelbrotWorkers.renderFractal({
-        canvas: mandelbrotRef.current,
-        type: 'mandelbrot',
-        ...FRACTAL_CONFIG.mandelbrot
-      });
-    }
-    if (burningShipRef.current) {
-      burningShipWorkers.renderFractal({
-        canvas: burningShipRef.current,
-        type: 'burningShip',
-        ...FRACTAL_CONFIG.burningShip
-      });
-    }
-    if (celticMandelbrotRef.current) {
-      celticMandelbrotWorkers.renderFractal({
-        canvas: celticMandelbrotRef.current,
-        type: 'celticMandelbrot',
-        ...FRACTAL_CONFIG.celticMandelbrot
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <>
       <div className="mt-3">
@@ -53,54 +12,13 @@ const Home: React.FC = () => {
 
       <div className="mt-3">
         <div className="row">
-          <div className="col-sm-6 mb-4">
-            <Link to="/julia" style={{ textDecoration: 'none' }}>
-              <canvas 
-                ref={juliaRef} 
-                className="col-sm btn-pop" 
-                style={{ width: '300px', height: '300px', borderRadius: '5px' }} 
-              />
-              <p className="text-muted mt-2" style={{fontSize: '0.8rem'}}>
-                {juliaWorkers.isRendering ? 'Rendering...' : (juliaWorkers.elapsed !== null ? `Rendered in ${juliaWorkers.elapsed} ms` : '')}
-              </p>
-            </Link>
-          </div>
-          <div className="col-sm-6 mb-4">
-            <Link to="/mandelbrot" style={{ textDecoration: 'none' }}>
-              <canvas 
-                ref={mandelbrotRef} 
-                className="col-sm btn-pop" 
-                style={{ width: '300px', height: '300px', borderRadius: '5px' }} 
-              />
-              <p className="text-muted mt-2" style={{fontSize: '0.8rem'}}>
-                {mandelbrotWorkers.isRendering ? 'Rendering...' : (mandelbrotWorkers.elapsed !== null ? `Rendered in ${mandelbrotWorkers.elapsed} ms` : '')}
-              </p>
-            </Link>
-          </div>
-          <div className="col-sm-6 mb-4">
-            <Link to="/burning-ship" style={{ textDecoration: 'none' }}>
-              <canvas 
-                ref={burningShipRef} 
-                className="col-sm btn-pop" 
-                style={{ width: '300px', height: '300px', borderRadius: '5px' }} 
-              />
-              <p className="text-muted mt-2" style={{fontSize: '0.8rem'}}>
-                {burningShipWorkers.isRendering ? 'Rendering...' : (burningShipWorkers.elapsed !== null ? `Rendered in ${burningShipWorkers.elapsed} ms` : '')}
-              </p>
-            </Link>
-          </div>
-          <div className="col-sm-6 mb-4">
-            <Link to="/celtic-mandelbrot" style={{ textDecoration: 'none' }}>
-              <canvas 
-                ref={celticMandelbrotRef} 
-                className="col-sm btn-pop" 
-                style={{ width: '300px', height: '300px', borderRadius: '5px' }} 
-              />
-              <p className="text-muted mt-2" style={{fontSize: '0.8rem'}}>
-                {celticMandelbrotWorkers.isRendering ? 'Rendering...' : (celticMandelbrotWorkers.elapsed !== null ? `Rendered in ${celticMandelbrotWorkers.elapsed} ms` : '')}
-              </p>
-            </Link>
-          </div>
+          {FRACTALS.map((fractal) => (
+            <div key={fractal.type} className="col-sm-6 mb-4">
+              <Link to={`/${fractal.path}`} style={{ textDecoration: 'none' }}>
+                <FractalCanvas fractal={fractal} />
+              </Link>
+            </div>
+          ))}
         </div>
       </div>
     </>

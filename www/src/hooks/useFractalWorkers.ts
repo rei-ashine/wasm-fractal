@@ -10,8 +10,9 @@ export interface RenderParams {
   y_min: number;
   y_max: number;
   max_iter: number;
-  real: number;
-  imaginary: number;
+  // z_0 for the Mandelbrot set, c for the Julia set; unused by the other fractals
+  real?: number;
+  imaginary?: number;
   aa_level?: number;
 }
 
@@ -39,7 +40,7 @@ export function useFractalWorkers() {
   const renderFractal = useCallback((params: RenderParams) => {
     cancelRendering();
 
-    const { canvas, type, x_min, x_max, y_min, y_max, max_iter, real, imaginary } = params;
+    const { canvas, type, x_min, x_max, y_min, y_max, max_iter, real = 0, imaginary = 0 } = params;
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) {
       console.warn('2D canvas context is not available');

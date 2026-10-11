@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
+import { FRACTALS } from '../config/fractalConfig';
 
 const Layout: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -14,10 +15,9 @@ const Layout: React.FC = () => {
         <div id="Navigation" className="overlay" style={{ width: menuOpen ? '100%' : '0%' }}>
           <div className="overlay-content">
             <Link to="/" onClick={() => setMenuOpen(false)}><span className="marker">Gallery</span></Link>
-            <Link to="/julia" onClick={() => setMenuOpen(false)}><span className="marker">Julia Set</span></Link>
-            <Link to="/mandelbrot" onClick={() => setMenuOpen(false)}><span className="marker">Mandelbrot Set</span></Link>
-            <Link to="/burning-ship" onClick={() => setMenuOpen(false)}><span className="marker">Burning Ship</span></Link>
-            <Link to="/celtic-mandelbrot" onClick={() => setMenuOpen(false)}><span className="marker">Celtic Mandelbrot</span></Link>
+            {FRACTALS.map((fractal) => (
+              <Link key={fractal.type} to={`/${fractal.path}`} onClick={() => setMenuOpen(false)}><span className="marker">{fractal.title}</span></Link>
+            ))}
           </div>
         </div>
       </header>

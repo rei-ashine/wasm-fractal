@@ -2,23 +2,39 @@ use num_complex::Complex;
 
 const LN_2: f64 = std::f64::consts::LN_2;
 
-pub fn get_n_diverged(z: Complex<f64>, c: Complex<f64>, max_iter: usize) -> f64 {
-    /*
-    This function evaluates the divergence of a cell and
-    returns the smoothed number of iterations up to the evaluation.
-    */
+/// The rectangle of the complex plane to render and how finely to sample it.
+#[derive(Clone, Copy, Debug)]
+pub struct View {
+    pub width: u32,
+    pub height: u32,
+    pub x_min: f64,
+    pub x_max: f64,
+    pub y_min: f64,
+    pub y_max: f64,
+    pub max_iter: usize,
+    pub aa_level: u32,
+}
+
+/// Iterates z_{n+1} = step(z_n) + c from z_0 = z and returns the smoothed number of
+/// iterations until |z| escapes, or max_iter if it never does.
+///
+/// `step` receives (Re z, Im z, (Re z)^2, (Im z)^2) and returns the real and imaginary
+/// parts of the degree-2 term that c is added to. The squares are passed in because the
+/// escape test needs them anyway.
+#[inline(always)]
+pub fn escape_time<S>(z: Complex<f64>, c: Complex<f64>, max_iter: usize, step: S) -> f64
+where
+    S: Fn(f64, f64, f64, f64) -> (f64, f64),
+{
     let mut zx = z.re;
     let mut zy = z.im;
-    let cx = c.re;
-    let cy = c.im;
-
     let mut zx2 = zx * zx;
     let mut zy2 = zy * zy;
 
     for i in 1..=max_iter {
-        // Optimized z = z * z + c
-        zy = 2.0 * zx * zy + cy;
-        zx = zx2 - zy2 + cx;
+        let (re, im) = step(zx, zy, zx2, zy2);
+        zx = re + c.re;
+        zy = im + c.im;
 
         zx2 = zx * zx;
         zy2 = zy * zy;
@@ -27,6 +43,7 @@ pub fn get_n_diverged(z: Complex<f64>, c: Complex<f64>, max_iter: usize) -> f64 
         if norm_sqr > 256.0 {
             // Smooth coloring formula: i + 1 - ln(ln(|z|)) / ln(2)
             // |z| = sqrt(norm_sqr), ln(|z|) = 0.5 * ln(norm_sqr)
+            // Every step is of degree 2, so the same formula applies to all of them.
             let log_z = 0.5 * norm_sqr.ln();
             let nu = log_z.ln() / LN_2;
             return (i as f64) + 1.0 - nu;
@@ -35,70 +52,13 @@ pub fn get_n_diverged(z: Complex<f64>, c: Complex<f64>, max_iter: usize) -> f64 
     max_iter as f64
 }
 
-pub fn get_n_diverged_burning_ship(c: Complex<f64>, max_iter: usize) -> f64 {
+pub fn get_n_diverged(z: Complex<f64>, c: Complex<f64>, max_iter: usize) -> f64 {
     /*
-    This function evaluates the divergence of a cell for the Burning Ship
-    fractal, z_{n+1} = (|Re z_n| + i|Im z_n|)^2 + c with z_0 = 0, and
+    This function evaluates the divergence of a cell for z_{n+1} = z_n^2 + c and
     returns the smoothed number of iterations up to the evaluation.
     */
-    let mut zx = 0.0_f64;
-    let mut zy = 0.0_f64;
-    let cx = c.re;
-    let cy = c.im;
-
-    let mut zx2 = 0.0;
-    let mut zy2 = 0.0;
-
-    for i in 1..=max_iter {
-        // (|x| + i|y|)^2 = x^2 - y^2 + 2i|xy|
-        zy = 2.0 * (zx * zy).abs() + cy;
-        zx = zx2 - zy2 + cx;
-
-        zx2 = zx * zx;
-        zy2 = zy * zy;
-
-        let norm_sqr = zx2 + zy2;
-        if norm_sqr > 256.0 {
-            // Degree 2, so the same smooth coloring as get_n_diverged applies
-            let log_z = 0.5 * norm_sqr.ln();
-            let nu = log_z.ln() / LN_2;
-            return (i as f64) + 1.0 - nu;
-        }
-    }
-    max_iter as f64
-}
-
-pub fn get_n_diverged_celtic(c: Complex<f64>, max_iter: usize) -> f64 {
-    /*
-    This function evaluates the divergence of a cell for the Celtic Mandelbrot
-    set, z_{n+1} = |Re(z_n^2)| + i Im(z_n^2) + c with z_0 = 0, and
-    returns the smoothed number of iterations up to the evaluation.
-    */
-    let mut zx = 0.0_f64;
-    let mut zy = 0.0_f64;
-    let cx = c.re;
-    let cy = c.im;
-
-    let mut zx2 = 0.0_f64;
-    let mut zy2 = 0.0_f64;
-
-    for i in 1..=max_iter {
-        // |Re(z^2)| + i Im(z^2) = |x^2 - y^2| + 2ixy
-        zy = 2.0 * zx * zy + cy;
-        zx = (zx2 - zy2).abs() + cx;
-
-        zx2 = zx * zx;
-        zy2 = zy * zy;
-
-        let norm_sqr = zx2 + zy2;
-        if norm_sqr > 256.0 {
-            // Degree 2, so the same smooth coloring as get_n_diverged applies
-            let log_z = 0.5 * norm_sqr.ln();
-            let nu = log_z.ln() / LN_2;
-            return (i as f64) + 1.0 - nu;
-        }
-    }
-    max_iter as f64
+    // z^2 = x^2 - y^2 + 2ixy
+    escape_time(z, c, max_iter, |x, y, x2, y2| (x2 - y2, 2.0 * x * y))
 }
 
 pub fn color_map(iter_index: f64, max_iter: usize) -> (u8, u8, u8) {
@@ -109,20 +69,11 @@ pub fn color_map(iter_index: f64, max_iter: usize) -> (u8, u8, u8) {
     (r, g, b)
 }
 
-pub fn render_fractal<F>(
-    width: u32,
-    height: u32,
-    x_min: f64,
-    x_max: f64,
-    y_min: f64,
-    y_max: f64,
-    max_iter: usize,
-    aa_level: u32,
-    calc_iter: F,
-) -> Vec<u8>
+pub fn render_fractal<F>(view: &View, calc_iter: F) -> Vec<u8>
 where
     F: Fn(f64, f64) -> f64,
 {
+    let View { width, height, x_min, x_max, y_min, y_max, max_iter, aa_level } = *view;
     let mut data = Vec::with_capacity((width * height * 4) as usize);
     
     let (base_level, fine_level) = match aa_level {

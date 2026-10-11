@@ -1,57 +1,34 @@
 
 use num_complex::Complex;
+use crate::logic::{get_n_diverged, render_fractal, View};
 
 
-pub fn generate_mandelbrot_set(
+pub fn generate_mandelbrot_set(view: &View, z_0: Complex<f64>) -> Vec<u8> {
     /*
     This function stores color information about each cell.
     */
-    width: u32,
-    height:u32,
-    x_min: f64,
-    x_max: f64,
-    y_min: f64,
-    y_max: f64,
-    max_iter: usize,
-    real: f64,
-    imaginary: f64,
-    aa_level: u32,
-) -> Vec<u8> {
-    // Initial value of z_0
-    let z_0 = Complex { re: real, im: imaginary };
+    let max_iter = view.max_iter;
+    render_fractal(view, |x, y| {
+        // Main cardioid check
+        let q = (x - 0.25) * (x - 0.25) + y * y;
+        if q * (q + (x - 0.25)) < 0.25 * y * y {
+            return max_iter as f64;
+        }
 
-    crate::logic::render_fractal(
-        width,
-        height,
-        x_min,
-        x_max,
-        y_min,
-        y_max,
-        max_iter,
-        aa_level,
-        |x, y| {
-            // Main cardioid check
-            let q = (x - 0.25) * (x - 0.25) + y * y;
-            if q * (q + (x - 0.25)) < 0.25 * y * y {
-                return max_iter as f64;
-            }
+        // Period-2 bulb check
+        if (x + 1.0) * (x + 1.0) + y * y < 0.0625 {
+            return max_iter as f64;
+        }
 
-            // Period-2 bulb check
-            if (x + 1.0) * (x + 1.0) + y * y < 0.0625 {
-                return max_iter as f64;
-            }
-
-            let c = Complex { re: x, im: y };
-            crate::logic::get_n_diverged(z_0, c, max_iter)
-        },
-    )
+        let c = Complex { re: x, im: y };
+        get_n_diverged(z_0, c, max_iter)
+    })
 }
 
 
 #[cfg(test)]
 mod tests_mandelbrot {
     use super::*;
-    use crate::logic::get_n_diverged;
 
     #[test]
     fn test_get_n_diverged() {
@@ -95,18 +72,18 @@ mod tests_mandelbrot {
         //let width = 400;
         //let height = 400;
 
-        let x_min = -2.0;
-        let x_max = 1.0;
-        let y_min = -1.0;
-        let y_max = 1.0;
-        let max_iter = 300;
-        let aa_level = 1;
+        let view = View {
+            width, height,
+            x_min: -2.0, x_max: 1.0,
+            y_min: -1.0, y_max: 1.0,
+            max_iter: 300,
+            aa_level: 1,
+        };
 
         // Initial value of z_0
-        let real = 0.0;
-        let imaginary = 0.0;
+        let z_0 = Complex { re: 0.0, im: 0.0 };
 
-        let data = generate_mandelbrot_set(width, height, x_min, x_max, y_min, y_max, max_iter, real, imaginary, aa_level);
+        let data = generate_mandelbrot_set(&view, z_0);
         assert_eq!(data.len() as u32, width * height * 4);
         assert_eq!(type_of(&data), "&alloc::vec::Vec<u8>");
 
