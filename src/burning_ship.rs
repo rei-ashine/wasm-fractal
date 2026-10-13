@@ -1,5 +1,5 @@
 use num_complex::Complex;
-use crate::logic::{escape_time, render_fractal, View};
+use crate::logic::{escape_time_periodic, render_fractal, View};
 
 
 pub fn get_n_diverged_burning_ship(c: Complex<f64>, max_iter: usize) -> f64 {
@@ -8,8 +8,14 @@ pub fn get_n_diverged_burning_ship(c: Complex<f64>, max_iter: usize) -> f64 {
     fractal, z_{n+1} = (|Re z_n| + i|Im z_n|)^2 + c with z_0 = 0, and
     returns the smoothed number of iterations up to the evaluation.
     */
-    // (|x| + i|y|)^2 = x^2 - y^2 + 2i|xy|
-    escape_time(Complex::new(0.0, 0.0), c, max_iter, |x, y, x2, y2| (x2 - y2, 2.0 * (x * y).abs()))
+    // Much of the view never escapes, so stop orbits early once they cycle
+    escape_time_periodic(Complex::new(0.0, 0.0), c, max_iter, burning_ship_step)
+}
+
+// (|x| + i|y|)^2 = x^2 - y^2 + 2i|xy|
+#[inline(always)]
+fn burning_ship_step(x: f64, y: f64, x2: f64, y2: f64) -> (f64, f64) {
+    (x2 - y2, 2.0 * (x * y).abs())
 }
 
 pub fn generate_burning_ship(view: &View) -> Vec<u8> {
@@ -25,7 +31,7 @@ pub fn generate_burning_ship(view: &View) -> Vec<u8> {
 #[cfg(test)]
 mod tests_burning_ship {
     use super::*;
-    use crate::logic::{color_map, get_n_diverged};
+    use crate::logic::{color_map, escape_time, get_n_diverged};
 
     #[test]
     fn test_get_n_diverged_burning_ship() {
@@ -62,6 +68,29 @@ mod tests_burning_ship {
         let upper = get_n_diverged_burning_ship(Complex { re: -1.75, im: 0.03 }, max_iter);
         let lower = get_n_diverged_burning_ship(Complex { re: -1.75, im: -0.03 }, max_iter);
         assert_ne!(upper, lower);
+    }
+
+    #[test]
+    fn test_periodicity_check_keeps_results() {
+        // Stopping cycling orbits early must give exactly what iterating to max_iter gives,
+        // including for points near the boundary that escape late.
+        let max_iter = 300;
+        let n = 300;
+        let z0 = Complex { re: 0.0, im: 0.0 };
+        let mut interior = 0;
+        for i in 0..n {
+            for j in 0..n {
+                let c = Complex {
+                    re: -2.5 + (1.5 - (-2.5)) * (j as f64 + 0.5) / n as f64,
+                    im: -2.0 + (1.0 - (-2.0)) * (i as f64 + 0.5) / n as f64,
+                };
+                let full = escape_time(z0, c, max_iter, burning_ship_step);
+                assert_eq!(get_n_diverged_burning_ship(c, max_iter), full, "c = {c}");
+                if full == max_iter as f64 { interior += 1; }
+            }
+        }
+        // The grid must include interior points, or the check was never exercised
+        assert!(interior > n * n / 20);
     }
 
     use std::fs;
