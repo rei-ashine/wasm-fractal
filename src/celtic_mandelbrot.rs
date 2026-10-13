@@ -1,5 +1,5 @@
 use num_complex::Complex;
-use crate::logic::{escape_time, render_fractal, View};
+use crate::logic::{escape_time_periodic, render_fractal, View};
 
 
 pub fn get_n_diverged_celtic(c: Complex<f64>, max_iter: usize) -> f64 {
@@ -8,8 +8,14 @@ pub fn get_n_diverged_celtic(c: Complex<f64>, max_iter: usize) -> f64 {
     set, z_{n+1} = |Re(z_n^2)| + i Im(z_n^2) + c with z_0 = 0, and
     returns the smoothed number of iterations up to the evaluation.
     */
-    // |Re(z^2)| + i Im(z^2) = |x^2 - y^2| + 2ixy
-    escape_time(Complex::new(0.0, 0.0), c, max_iter, |x, y, x2, y2| ((x2 - y2).abs(), 2.0 * x * y))
+    // Much of the view never escapes, so stop orbits early once they cycle
+    escape_time_periodic(Complex::new(0.0, 0.0), c, max_iter, celtic_step)
+}
+
+// |Re(z^2)| + i Im(z^2) = |x^2 - y^2| + 2ixy
+#[inline(always)]
+fn celtic_step(x: f64, y: f64, x2: f64, y2: f64) -> (f64, f64) {
+    ((x2 - y2).abs(), 2.0 * x * y)
 }
 
 pub fn generate_celtic_mandelbrot(view: &View) -> Vec<u8> {
@@ -25,7 +31,7 @@ pub fn generate_celtic_mandelbrot(view: &View) -> Vec<u8> {
 #[cfg(test)]
 mod tests_celtic_mandelbrot {
     use super::*;
-    use crate::logic::{color_map, get_n_diverged};
+    use crate::logic::{color_map, escape_time, get_n_diverged};
 
     #[test]
     fn test_get_n_diverged_celtic() {
@@ -65,6 +71,29 @@ mod tests_celtic_mandelbrot {
             assert!(upper < max_iter as f64);
             assert_eq!(upper, lower);
         }
+    }
+
+    #[test]
+    fn test_periodicity_check_keeps_results() {
+        // Stopping cycling orbits early must give exactly what iterating to max_iter gives,
+        // including for points near the boundary that escape late.
+        let max_iter = 300;
+        let n = 300;
+        let z0 = Complex { re: 0.0, im: 0.0 };
+        let mut interior = 0;
+        for i in 0..n {
+            for j in 0..n {
+                let c = Complex {
+                    re: -2.0 + (2.0 - (-2.0)) * (j as f64 + 0.5) / n as f64,
+                    im: -2.0 + (2.0 - (-2.0)) * (i as f64 + 0.5) / n as f64,
+                };
+                let full = escape_time(z0, c, max_iter, celtic_step);
+                assert_eq!(get_n_diverged_celtic(c, max_iter), full, "c = {c}");
+                if full == max_iter as f64 { interior += 1; }
+            }
+        }
+        // The grid must include interior points, or the check was never exercised
+        assert!(interior > n * n / 20);
     }
 
     use std::fs;

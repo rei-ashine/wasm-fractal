@@ -15,6 +15,11 @@ pub struct View {
     pub aa_level: u32,
 }
 
+// Two orbit points closer than this in both coordinates are treated as the same point
+// by the periodicity check. 1e-6 already turned a few slowly escaping Burning Ship pixels
+// black at the site's default view; 1e-9 changed no pixel of any fractal there.
+const PERIOD_EPSILON: f64 = 1e-9;
+
 /// Iterates z_{n+1} = step(z_n) + c from z_0 = z and returns the smoothed number of
 /// iterations until |z| escapes, or max_iter if it never does.
 ///
@@ -26,10 +31,38 @@ pub fn escape_time<S>(z: Complex<f64>, c: Complex<f64>, max_iter: usize, step: S
 where
     S: Fn(f64, f64, f64, f64) -> (f64, f64),
 {
+    iterate::<S, false>(z, c, max_iter, step)
+}
+
+/// Like `escape_time`, but stops early with max_iter once the orbit is caught in a cycle
+/// (Brent-style: z is compared with a point saved at doubling intervals).
+///
+/// It only pays off when many points never escape; for sets with few interior points
+/// (the Julia set here) the extra comparisons make it slower, and the Mandelbrot set
+/// already skips most of its interior with the cardioid / bulb checks.
+#[inline(always)]
+pub fn escape_time_periodic<S>(z: Complex<f64>, c: Complex<f64>, max_iter: usize, step: S) -> f64
+where
+    S: Fn(f64, f64, f64, f64) -> (f64, f64),
+{
+    iterate::<S, true>(z, c, max_iter, step)
+}
+
+#[inline(always)]
+fn iterate<S, const CHECK_PERIOD: bool>(z: Complex<f64>, c: Complex<f64>, max_iter: usize, step: S) -> f64
+where
+    S: Fn(f64, f64, f64, f64) -> (f64, f64),
+{
     let mut zx = z.re;
     let mut zy = z.im;
     let mut zx2 = zx * zx;
     let mut zy2 = zy * zy;
+
+    // The saved orbit point, and when to save the next one
+    let mut saved_x = zx;
+    let mut saved_y = zy;
+    let mut steps_since_save = 0usize;
+    let mut save_interval = 1usize;
 
     for i in 1..=max_iter {
         let (re, im) = step(zx, zy, zx2, zy2);
@@ -47,6 +80,20 @@ where
             let log_z = 0.5 * norm_sqr.ln();
             let nu = log_z.ln() / LN_2;
             return (i as f64) + 1.0 - nu;
+        }
+
+        if CHECK_PERIOD {
+            // Back at a saved point: the orbit repeats forever and never escapes
+            if (zx - saved_x).abs() < PERIOD_EPSILON && (zy - saved_y).abs() < PERIOD_EPSILON {
+                return max_iter as f64;
+            }
+            steps_since_save += 1;
+            if steps_since_save == save_interval {
+                saved_x = zx;
+                saved_y = zy;
+                steps_since_save = 0;
+                save_interval *= 2;
+            }
         }
     }
     max_iter as f64
