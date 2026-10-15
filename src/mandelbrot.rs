@@ -1,7 +1,17 @@
 
 use num_complex::Complex;
-use crate::logic::{get_n_diverged, render_fractal, View};
+use crate::logic::{escape_time_periodic, render_fractal, square_step, View};
 
+
+pub fn get_n_diverged_mandelbrot(z_0: Complex<f64>, c: Complex<f64>, max_iter: usize) -> f64 {
+    /*
+    This function evaluates the divergence of a cell for the Mandelbrot set,
+    z_{n+1} = z_n^2 + c, and returns the smoothed number of iterations up to the evaluation.
+    */
+    // The cardioid / bulb checks skip only part of the interior; the points in the other
+    // bulbs and in the mini Mandelbrot sets are stopped early once their orbit cycles.
+    escape_time_periodic(z_0, c, max_iter, square_step)
+}
 
 pub fn generate_mandelbrot_set(view: &View, z_0: Complex<f64>) -> Vec<u8> {
     /*
@@ -21,7 +31,7 @@ pub fn generate_mandelbrot_set(view: &View, z_0: Complex<f64>) -> Vec<u8> {
         }
 
         let c = Complex { re: x, im: y };
-        get_n_diverged(z_0, c, max_iter)
+        get_n_diverged_mandelbrot(z_0, c, max_iter)
     })
 }
 
@@ -29,6 +39,31 @@ pub fn generate_mandelbrot_set(view: &View, z_0: Complex<f64>) -> Vec<u8> {
 #[cfg(test)]
 mod tests_mandelbrot {
     use super::*;
+    use crate::logic::get_n_diverged;
+    use crate::logic::periodicity_test_support::{assert_grid_matches, assert_near_cycle_points_match};
+
+    // get_n_diverged_mandelbrot with z_0 = 0, the form the shared periodicity tests take
+    fn get_n_from_zero(c: Complex<f64>, max_iter: usize) -> f64 {
+        get_n_diverged_mandelbrot(Complex { re: 0.0, im: 0.0 }, c, max_iter)
+    }
+
+    #[test]
+    fn test_periodicity_check_keeps_results() {
+        // Stopping cycling orbits early must give exactly what iterating to max_iter gives.
+        // get_n_diverged_mandelbrot has no cardioid / bulb shortcut, so this also covers
+        // the interior those checks skip.
+        let interior = assert_grid_matches(square_step, get_n_from_zero, (-2.0, 1.0), (-1.0, 1.0), 300, 300);
+        assert!(interior > 300 * 300 / 20);
+
+        // A region whose interior is a period-3 bulb, which the shortcuts do not cover
+        let interior = assert_grid_matches(square_step, get_n_from_zero, (-0.3, 0.1), (0.55, 0.95), 600, 1000);
+        assert!(interior > 600 * 600 / 5);
+    }
+
+    #[test]
+    fn test_periodicity_check_near_cycles() {
+        assert_near_cycle_points_match(square_step, get_n_from_zero);
+    }
 
     #[test]
     fn test_get_n_diverged() {

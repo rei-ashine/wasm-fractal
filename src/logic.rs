@@ -15,11 +15,6 @@ pub struct View {
     pub aa_level: u32,
 }
 
-// Two orbit points closer than this in both coordinates are treated as the same point
-// by the periodicity check. 1e-6 already turned a few slowly escaping Burning Ship pixels
-// black at the site's default view; 1e-9 changed no pixel of any fractal there.
-const PERIOD_EPSILON: f64 = 1e-9;
-
 /// Iterates z_{n+1} = step(z_n) + c from z_0 = z and returns the smoothed number of
 /// iterations until |z| escapes, or max_iter if it never does.
 ///
@@ -34,12 +29,18 @@ where
     iterate::<S, false>(z, c, max_iter, step)
 }
 
-/// Like `escape_time`, but stops early with max_iter once the orbit is caught in a cycle
-/// (Brent-style: z is compared with a point saved at doubling intervals).
+/// Like `escape_time`, but stops early with max_iter once the computed orbit repeats, and
+/// always returns exactly what `escape_time` returns.
 ///
-/// It only pays off when many points never escape; for sets with few interior points
-/// (the Julia set here) the extra comparisons make it slower, and the Mandelbrot set
-/// already skips most of its interior with the cardioid / bulb checks.
+/// z is compared with a point saved at doubling intervals (Brent-style). Only a bit-for-bit
+/// match counts: each iterate depends on nothing but the previous one, so after an exact
+/// repeat the orbit runs through the same non-escaping points forever. Being merely close
+/// to a saved point proves nothing, since an orbit can linger near a repelling or neutral
+/// cycle and still escape later. Orbits pulled into an attracting cycle settle into an
+/// exact repeat once they converge to the last bit.
+///
+/// It only pays off when many points never escape. The Julia set at the site's c has
+/// almost no interior points, so it uses plain `escape_time`.
 #[inline(always)]
 pub fn escape_time_periodic<S>(z: Complex<f64>, c: Complex<f64>, max_iter: usize, step: S) -> f64
 where
@@ -58,11 +59,9 @@ where
     let mut zx2 = zx * zx;
     let mut zy2 = zy * zy;
 
-    // The saved orbit point, and when to save the next one
+    // The orbit point saved last; z_0 first, then z_1, z_3, z_7, ... (see below)
     let mut saved_x = zx;
     let mut saved_y = zy;
-    let mut steps_since_save = 0usize;
-    let mut save_interval = 1usize;
 
     for i in 1..=max_iter {
         let (re, im) = step(zx, zy, zx2, zy2);
@@ -83,16 +82,16 @@ where
         }
 
         if CHECK_PERIOD {
-            // Back at a saved point: the orbit repeats forever and never escapes
-            if (zx - saved_x).abs() < PERIOD_EPSILON && (zy - saved_y).abs() < PERIOD_EPSILON {
+            // Exactly back at the saved point: every later iterate repeats one already
+            // checked above, so the orbit never escapes
+            if zx.to_bits() == saved_x.to_bits() && zy.to_bits() == saved_y.to_bits() {
                 return max_iter as f64;
             }
-            steps_since_save += 1;
-            if steps_since_save == save_interval {
+            // Save at i = 2^k - 1: once the orbit is on a cycle of length p and 2^k >= p,
+            // the cycle brings z back to the saved point within the next 2^k iterations
+            if (i + 1).is_power_of_two() {
                 saved_x = zx;
                 saved_y = zy;
-                steps_since_save = 0;
-                save_interval *= 2;
             }
         }
     }
@@ -104,8 +103,13 @@ pub fn get_n_diverged(z: Complex<f64>, c: Complex<f64>, max_iter: usize) -> f64 
     This function evaluates the divergence of a cell for z_{n+1} = z_n^2 + c and
     returns the smoothed number of iterations up to the evaluation.
     */
-    // z^2 = x^2 - y^2 + 2ixy
-    escape_time(z, c, max_iter, |x, y, x2, y2| (x2 - y2, 2.0 * x * y))
+    escape_time(z, c, max_iter, square_step)
+}
+
+/// z^2 = x^2 - y^2 + 2ixy, the step of the Julia and Mandelbrot sets.
+#[inline(always)]
+pub fn square_step(x: f64, y: f64, x2: f64, y2: f64) -> (f64, f64) {
+    (x2 - y2, 2.0 * x * y)
 }
 
 pub fn color_map(iter_index: f64, max_iter: usize) -> (u8, u8, u8) {
@@ -199,4 +203,62 @@ where
         }
     }
     data
+}
+
+/// Helpers that check escape_time_periodic against plain escape_time, shared by the tests
+/// of every fractal that uses the periodicity check.
+#[cfg(test)]
+pub(crate) mod periodicity_test_support {
+    use super::*;
+
+    pub type Step = fn(f64, f64, f64, f64) -> (f64, f64);
+    pub type GetN = fn(Complex<f64>, usize) -> f64;
+
+    /// Asserts that `get_n` (z_0 = 0, with the periodicity check) returns exactly what
+    /// iterating `step` to max_iter returns at c.
+    pub fn assert_point_matches(step: Step, get_n: GetN, c: Complex<f64>, max_iter: usize) {
+        let full = escape_time(Complex::new(0.0, 0.0), c, max_iter, step);
+        assert_eq!(get_n(c, max_iter), full, "c = {c}, max_iter = {max_iter}");
+    }
+
+    /// Runs assert_point_matches over an n x n grid of cell centers covering the rectangle,
+    /// and returns how many of the points never escape.
+    pub fn assert_grid_matches(
+        step: Step,
+        get_n: GetN,
+        (x_min, x_max): (f64, f64),
+        (y_min, y_max): (f64, f64),
+        n: usize,
+        max_iter: usize,
+    ) -> usize {
+        let mut interior = 0;
+        for i in 0..n {
+            for j in 0..n {
+                let c = Complex {
+                    re: x_min + (x_max - x_min) * (j as f64 + 0.5) / n as f64,
+                    im: y_min + (y_max - y_min) * (i as f64 + 0.5) / n as f64,
+                };
+                assert_point_matches(step, get_n, c, max_iter);
+                if get_n(c, max_iter) == max_iter as f64 {
+                    interior += 1;
+                }
+            }
+        }
+        interior
+    }
+
+    /// Points where an orbit stays close to a cycle for a while and then escapes anyway, so a
+    /// check that only asks "is z near a saved point?" wrongly reports them as never escaping.
+    /// They lie on the real axis, where the Burning Ship, the Celtic Mandelbrot set and the
+    /// Mandelbrot set all iterate z^2 + c.
+    pub fn assert_near_cycle_points_match(step: Step, get_n: GetN) {
+        // c slightly left of -2: 0 -> c -> ~2, and the orbit lingers near the repelling
+        // fixed point z = 2 before escaping after about 20 iterations
+        for d in [1e-11, 1e-12, 1e-13] {
+            assert_point_matches(step, get_n, Complex::new(-2.0 - d, 0.0), 300);
+        }
+        // c slightly right of 1/4: the orbit crawls past z = 1/2 in steps far below 1e-9
+        // and escapes after about 140000 iterations
+        assert_point_matches(step, get_n, Complex::new(0.25 + 5e-10, 0.0), 400_000);
+    }
 }

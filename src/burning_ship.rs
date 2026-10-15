@@ -31,7 +31,8 @@ pub fn generate_burning_ship(view: &View) -> Vec<u8> {
 #[cfg(test)]
 mod tests_burning_ship {
     use super::*;
-    use crate::logic::{color_map, escape_time, get_n_diverged};
+    use crate::logic::{color_map, get_n_diverged};
+    use crate::logic::periodicity_test_support::{assert_grid_matches, assert_near_cycle_points_match};
 
     #[test]
     fn test_get_n_diverged_burning_ship() {
@@ -72,25 +73,19 @@ mod tests_burning_ship {
 
     #[test]
     fn test_periodicity_check_keeps_results() {
-        // Stopping cycling orbits early must give exactly what iterating to max_iter gives,
-        // including for points near the boundary that escape late.
-        let max_iter = 300;
-        let n = 300;
-        let z0 = Complex { re: 0.0, im: 0.0 };
-        let mut interior = 0;
-        for i in 0..n {
-            for j in 0..n {
-                let c = Complex {
-                    re: -2.5 + (1.5 - (-2.5)) * (j as f64 + 0.5) / n as f64,
-                    im: -2.0 + (1.0 - (-2.0)) * (i as f64 + 0.5) / n as f64,
-                };
-                let full = escape_time(z0, c, max_iter, burning_ship_step);
-                assert_eq!(get_n_diverged_burning_ship(c, max_iter), full, "c = {c}");
-                if full == max_iter as f64 { interior += 1; }
-            }
-        }
+        // Stopping cycling orbits early must give exactly what iterating to max_iter gives.
+        let interior = assert_grid_matches(burning_ship_step, get_n_diverged_burning_ship, (-2.5, 1.5), (-2.0, 1.0), 300, 300);
         // The grid must include interior points, or the check was never exercised
-        assert!(interior > n * n / 20);
+        assert!(interior > 300 * 300 / 20);
+
+        // The site's default view, sampled as densely as a 600 px canvas with 2x2 AA,
+        // where an approximate check turned slowly escaping boundary points black
+        assert_grid_matches(burning_ship_step, get_n_diverged_burning_ship, (-1.8, -1.6), (-0.1, 0.1), 1200, 300);
+    }
+
+    #[test]
+    fn test_periodicity_check_near_cycles() {
+        assert_near_cycle_points_match(burning_ship_step, get_n_diverged_burning_ship);
     }
 
     use std::fs;
