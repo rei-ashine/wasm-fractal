@@ -149,6 +149,11 @@ canvas.btn-pop {
   margin: 0 auto;
 }
 
+/* Monospace digits line up in the inputs */
+.fractal-simulator .form-control {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
 .marker {
   display: inline;
   background-image: linear-gradient(90deg, #FFFE03, #FFFE03);
