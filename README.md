@@ -11,6 +11,7 @@ DATE: Jul. 8th, 2026
 - **Professional MathJax Integration**: Displays exact mathematical notations for fractals ($z_{n+1} = z_n^2 + c$) using robust React Promise chaining to prevent race conditions.
 - **Google Tag Manager (GTM) Ready**: Built-in support for GTM and GA4 analytics through strict TypeScript definitions (`global.d.ts`).
 - **Zero-Copy Data Transfer**: Uses Transferable Objects for fast pixel data transfer from Workers to the Canvas.
+- **Zoomable Simulator**: Each fractal page can be zoomed and panned with the mouse wheel, drag, pinch and double tap, and jumped to by entering the center, zoom, max iterations and (for the Julia set) the constant c.
 
 ## Adding a Fractal
 
@@ -24,6 +25,12 @@ DATE: Jul. 8th, 2026
 .
 ├── Cargo.lock
 ├── Cargo.toml
+├── docs
+│   └── superpowers
+│       ├── plans
+│       │   └── 2026-10-17-zoom-simulator.md
+│       └── specs
+│           └── 2026-10-17-zoom-simulator-design.md
 ├── GEMINI.md
 ├── pkg
 │   ├── package.json
@@ -65,12 +72,18 @@ DATE: Jul. 8th, 2026
     ├── src
     │   ├── components
     │   │   ├── FractalCanvas.tsx
-    │   │   └── Layout.tsx
+    │   │   ├── FractalSimulator.tsx
+    │   │   ├── Layout.tsx
+    │   │   ├── MathBlock.tsx
+    │   │   └── SimulatorControls.tsx
     │   ├── config
+    │   │   ├── fractalConfig.test.ts
     │   │   └── fractalConfig.ts
     │   ├── hooks
+    │   │   ├── useCanvasGestures.ts
     │   │   ├── useFractalWorkers.ts
-    │   │   └── useMathJax.ts
+    │   │   ├── useMathJax.ts
+    │   │   └── useSimulatorCanvas.ts
     │   ├── main.tsx
     │   ├── pages
     │   │   ├── FractalPage.tsx
@@ -80,14 +93,16 @@ DATE: Jul. 8th, 2026
     │   ├── types
     │   │   └── global.d.ts
     │   ├── utils
-    │   │   └── mathjax.ts
+    │   │   ├── mathjax.ts
+    │   │   ├── viewMath.test.ts
+    │   │   └── viewMath.ts
     │   └── workers
     │       ├── fractalWorker.ts
     │       └── workerPool.ts
     ├── tsconfig.json
     └── vite.config.ts
 
-18 directories, 43 files
+21 directories, 57 files
 ```
 
 ---
