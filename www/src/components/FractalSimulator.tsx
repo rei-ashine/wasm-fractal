@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import SimulatorControls, { AppliedValues, ControlValues } from './SimulatorControls';
 import { Complex, FractalDefinition, initialC } from '../config/fractalConfig';
+import { useCanvasGestures } from '../hooks/useCanvasGestures';
 import { physicalCanvasSize } from '../hooks/useFractalWorkers';
 import { PIXEL_RATIO_CAP, RenderStatus, Scene, useSimulatorCanvas } from '../hooks/useSimulatorCanvas';
 import {
   Range, autoMaxIter, clampManualMaxIter, formatCenter, formatZoom, isAtMaxZoom, limitsFor, rangeCenter,
-  rangeFromCenter, rangeWidth, rangesEqual, zoomAt, zoomOf,
+  panBy, rangeFromCenter, rangeWidth, rangesEqual, zoomAt, zoomOf,
 } from '../utils/viewMath';
 
 interface FractalSimulatorProps {
@@ -46,6 +47,8 @@ const FractalSimulator: React.FC<FractalSimulatorProps> = ({ fractal, c, onCChan
   // rangeRef is the view the handlers work on, range its copy for display
   const rangeRef = useRef<Range>(initialRange);
   const [range, setRange] = useState<Range>(initialRange);
+  // The animation frame that will copy rangeRef to range, while a gesture moves the view
+  const rangeFrameRef = useRef<number | null>(null);
   // The scene last passed to render, or null once a preview has replaced its image
   const lastSceneRef = useRef<Scene | null>(null);
   // iterRef is the setting the handlers work on, iter its copy for display
@@ -95,6 +98,41 @@ const FractalSimulator: React.FC<FractalSimulatorProps> = ({ fractal, c, onCChan
     moveTo(zoomAt(rangeRef.current, size / 2, size / 2, factor, size, limits()), c);
   };
 
+  // A gesture changes the view on every event, but the inputs and the label follow once per frame
+  const showRangeNextFrame = () => {
+    if (rangeFrameRef.current !== null) return;
+    rangeFrameRef.current = requestAnimationFrame(() => {
+      rangeFrameRef.current = null;
+      setRange(rangeRef.current);
+    });
+  };
+  const showRangeNow = () => {
+    if (rangeFrameRef.current !== null) cancelAnimationFrame(rangeFrameRef.current);
+    rangeFrameRef.current = null;
+    setRange(rangeRef.current);
+  };
+
+  // Wheel, drag, pinch and double tap, in CSS px of the canvas (a canvas without a size has nothing to move)
+  const gestureSize = () => canvasRef.current?.clientWidth ?? 0;
+  useCanvasGestures(canvasRef, {
+    onPan: (dx, dy) => {
+      const size = gestureSize();
+      if (size === 0) return;
+      previewView(panBy(rangeRef.current, dx, dy, size, limits()));
+      showRangeNextFrame();
+    },
+    onZoom: (sx, sy, factor) => {
+      const size = gestureSize();
+      if (size === 0) return;
+      previewView(zoomAt(rangeRef.current, sx, sy, factor, size, limits()));
+      showRangeNextFrame();
+    },
+    onGestureEnd: () => {
+      showRangeNow();
+      commit(rangeRef.current, c);
+    },
+  });
+
   // The scene is rendered with the initial c right away; when the c prop follows,
   // commit finds the same scene and does not render it twice
   const reset = () => {
@@ -132,9 +170,12 @@ const FractalSimulator: React.FC<FractalSimulatorProps> = ({ fractal, c, onCChan
   };
 
   // In development StrictMode mounts twice, and the cleanup in between cancels the first
-  // render; forgetting its scene makes the second mount render again
+  // render; forgetting its scene makes the second mount render again. Leaving the page drops
+  // the frame that would show the range.
   useEffect(() => () => {
     lastSceneRef.current = null;
+    if (rangeFrameRef.current !== null) cancelAnimationFrame(rangeFrameRef.current);
+    rangeFrameRef.current = null;
   }, []);
 
   // The first render when the page opens, and a new one when c changes

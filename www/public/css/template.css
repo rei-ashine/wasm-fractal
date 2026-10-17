@@ -143,6 +143,12 @@ canvas.btn-pop {
   margin: 0 auto;
   background-color: #000;
   border-radius: 5px;
+  /* The gestures zoom and move the view: no browser scrolling or page zoom on the canvas */
+  touch-action: none;
+  cursor: grab;
+}
+.fractal-simulator canvas:active {
+  cursor: grabbing;
 }
 .fractal-simulator .simulator-controls {
   max-width: 600px;
