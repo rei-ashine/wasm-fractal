@@ -102,12 +102,15 @@ export function useSimulatorCanvas(type: FractalType, canvasRef: RefObject<HTMLC
       clear: false, pixelRatioCap: PIXEL_RATIO_CAP,
     };
     // false means cancelled, and a new token means a newer render, a preview or unmounting
-    // took over the canvas; either way this render stops
+    // took over the canvas; either way this render stops. Cancelled while still the latest
+    // render (nothing else took over), it is not rendering any more
     void (async () => {
       const quick = await renderFractal({ ...params, scale: QUICK_SCALE, aa_level: 1 });
-      if (!quick || token !== tokenRef.current) return;
+      if (token !== tokenRef.current) return;
+      if (!quick) { setStatus({ kind: 'idle' }); return; }
       const full = await renderFractal({ ...params, aa_level: 3 });
-      if (!full || token !== tokenRef.current) return;
+      if (token !== tokenRef.current) return;
+      if (!full) { setStatus({ kind: 'idle' }); return; }
       setStatus({ kind: 'done', ms: Math.round(performance.now() - start) });
     })();
   }, [canvasRef, type, renderFractal, cancelRendering, drawPreview]);

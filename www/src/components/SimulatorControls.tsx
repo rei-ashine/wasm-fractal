@@ -101,6 +101,7 @@ const SimulatorControls: React.FC<SimulatorControlsProps> = ({
     <input
       id={`${id}-${f}`}
       className={`form-control form-control-sm${invalid.has(f) ? ' is-invalid' : ''}`}
+      aria-invalid={invalid.has(f) ? true : undefined}
       type="text"
       autoComplete="off"
       spellCheck={false}
@@ -115,38 +116,41 @@ const SimulatorControls: React.FC<SimulatorControlsProps> = ({
 
   return (
     <>
-      <div className="simulator-controls d-flex align-items-center gap-2 mt-2">
-        <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onZoomOut}>−</button>
-        <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onZoomIn}>+</button>
-        <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onReset}>Reset</button>
-        <span>{zoomLabel}</span>
-      </div>
-      <form className="row g-2 mt-2 simulator-controls" onSubmit={submit}>
-        {fields.map((f) => (
-          <div key={f} className="col-6 col-sm-3">
-            {label(f)}
-            {f === 'maxIter' ? (
-              <div className="d-flex align-items-center gap-2">
-                {input(f)}
-                <div className="form-check mb-0">
-                  <input
-                    id={`${id}-auto`}
-                    className="form-check-input"
-                    type="checkbox"
-                    checked={values.auto}
-                    onChange={(e) => onAutoChange(e.target.checked)}
-                  />
-                  <label className="form-check-label small" htmlFor={`${id}-auto`}>Auto</label>
-                </div>
-              </div>
-            ) : input(f)}
-          </div>
-        ))}
-        <div className="col-6 col-sm-3 d-flex align-items-end">
-          <button type="submit" className="btn btn-sm btn-primary">Go</button>
+      {/* The wrapper is as wide as the canvas; the .row form inside keeps Bootstrap's gutters */}
+      <div className="simulator-controls">
+        <div className="d-flex align-items-center gap-2 mt-2">
+          <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onZoomOut}>−</button>
+          <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onZoomIn}>+</button>
+          <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onReset}>Reset</button>
+          <span>{zoomLabel}</span>
         </div>
-      </form>
-      <p className="text-muted mt-2" style={{ fontSize: '0.8rem' }}>{status}</p>
+        <form className="row g-2 mt-2" onSubmit={submit}>
+          {fields.map((f) => (
+            <div key={f} className="col-6 col-sm-3">
+              {label(f)}
+              {f === 'maxIter' ? (
+                <div className="d-flex align-items-center gap-2">
+                  {input(f)}
+                  <div className="form-check mb-0">
+                    <input
+                      id={`${id}-auto`}
+                      className="form-check-input"
+                      type="checkbox"
+                      checked={values.auto}
+                      onChange={(e) => onAutoChange(e.target.checked)}
+                    />
+                    <label className="form-check-label small" htmlFor={`${id}-auto`}>Auto</label>
+                  </div>
+                </div>
+              ) : input(f)}
+            </div>
+          ))}
+          <div className="col-6 col-sm-3 d-flex align-items-end">
+            <button type="submit" className="btn btn-sm btn-primary">Go</button>
+          </div>
+        </form>
+      </div>
+      <p className="simulator-status text-muted mt-2" style={{ fontSize: '0.8rem' }}>{status}</p>
     </>
   );
 };

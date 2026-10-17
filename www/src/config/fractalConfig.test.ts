@@ -20,6 +20,7 @@ test('initial ranges are square', () => {
 test('the Julia formula shows c', () => {
   const j = byType('julia');
   assert.deepEqual(j.formula(initialC(j)), ['z_{n+1} &= z_n^2 + c', 'c &= -0.7269 + 0.1889i']);
+  assert.deepEqual(j.formula({ re: -0.4, im: -0.6 }), ['z_{n+1} &= z_n^2 + c', 'c &= -0.4 - 0.6i']);
   assert.equal(complexTeX({ re: -0.4, im: -0.6 }), '-0.4 - 0.6i');
   assert.equal(complexTeX({ re: 0.25, im: 0 }), '0.25 + 0i');
 });

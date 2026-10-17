@@ -68,7 +68,12 @@ export function useCanvasGestures(canvasRef: RefObject<HTMLCanvasElement>, handl
 
     const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
-      canvas.setPointerCapture(e.pointerId);
+      // Capture can fail (the pointer is already gone); the press still counts without it
+      try {
+        canvas.setPointerCapture(e.pointerId);
+      } catch {
+        // ignored
+      }
       const { x, y } = position(e);
       pointers.set(e.pointerId, { x, y, startX: x, startY: y, downTime: e.timeStamp, moved: false });
       if (pointers.size >= 2) {
@@ -80,6 +85,12 @@ export function useCanvasGestures(canvasRef: RefObject<HTMLCanvasElement>, handl
     const onPointerMove = (e: PointerEvent) => {
       const p = pointers.get(e.pointerId);
       if (!p) return;
+      // A mouse moving with its button up was released where no pointerup reached the canvas:
+      // end the press instead of panning on hover
+      if (e.pointerType === 'mouse' && (e.buttons & 1) === 0) {
+        onPointerEnd(e);
+        return;
+      }
       const { x, y } = position(e);
       const dx = x - p.x;
       const dy = y - p.y;
@@ -99,11 +110,18 @@ export function useCanvasGestures(canvasRef: RefObject<HTMLCanvasElement>, handl
       }
     };
 
+    // pointerup and pointercancel, and the ends inferred from lostpointercapture or a move with
+    // the mouse button up (pointerup may never arrive); only a real pointerup can be a tap.
+    // A pointer already removed is ignored, so a pointerup and its lostpointercapture end it once
     const onPointerEnd = (e: PointerEvent) => {
       const p = pointers.get(e.pointerId);
       if (!p) return;
       pointers.delete(e.pointerId);
-      if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+      try {
+        if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+      } catch {
+        // ignored
+      }
       // Back from two pointers to one: the one left drags on from where it is now, not from
       // where the pinch started, so the view does not jump (each pointer keeps its last position)
       pinch = pointers.size >= 2 ? pinchOf(pointers) : null;
@@ -142,12 +160,14 @@ export function useCanvasGestures(canvasRef: RefObject<HTMLCanvasElement>, handl
     canvas.addEventListener('pointermove', onPointerMove);
     canvas.addEventListener('pointerup', onPointerEnd);
     canvas.addEventListener('pointercancel', onPointerEnd);
+    canvas.addEventListener('lostpointercapture', onPointerEnd);
     canvas.addEventListener('wheel', onWheel, { passive: false });
     return () => {
       canvas.removeEventListener('pointerdown', onPointerDown);
       canvas.removeEventListener('pointermove', onPointerMove);
       canvas.removeEventListener('pointerup', onPointerEnd);
       canvas.removeEventListener('pointercancel', onPointerEnd);
+      canvas.removeEventListener('lostpointercapture', onPointerEnd);
       canvas.removeEventListener('wheel', onWheel);
       if (wheelTimer !== null) clearTimeout(wheelTimer);
     };

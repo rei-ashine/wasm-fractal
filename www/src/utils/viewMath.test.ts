@@ -120,6 +120,8 @@ test('formatZoom', () => {
   assert.equal(formatZoom(1), '1'); assert.equal(formatZoom(0.025), '0.025');
   assert.equal(formatZoom(1250.4), '1,250'); assert.equal(formatZoom(12345), '12,300');
   assert.equal(formatZoom(3.4712e9), '3.47e+9');
+  assert.equal(formatZoom(999000), '999,000'); assert.equal(formatZoom(999600), '1.00e+6');
+  assert.equal(formatZoom(2.5e6), '2.50e+6');
 });
 test('parseNumber', () => {
   assert.equal(parseNumber('3.47e9'), 3.47e9); assert.equal(parseNumber(' -0.5 '), -0.5);

@@ -168,8 +168,10 @@ export function formatCenter(value: number, pixelWidth: number): string {
 
 // Without the leading "×" and the trailing " (max)"
 export function formatZoom(zoom: number): string {
-  if (zoom >= 1e6) return zoom.toExponential(2);
-  return Number(zoom.toPrecision(3)).toLocaleString('en-US', { maximumFractionDigits: 20 });
+  // 999,600 rounds to 1,000,000 at 3 significant digits: exponential from there, as from 1e6
+  const p = Number(zoom.toPrecision(3));
+  if (p >= 1e6) return zoom.toExponential(2);
+  return p.toLocaleString('en-US', { maximumFractionDigits: 20 });
 }
 
 // Reads a number typed in an input: spaces around it and commas in it are ignored
