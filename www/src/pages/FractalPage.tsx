@@ -1,7 +1,7 @@
 import React from 'react';
 import FractalCanvas from '../components/FractalCanvas';
 import { useMathJax } from '../hooks/useMathJax';
-import { FractalDefinition } from '../config/fractalConfig';
+import { FractalDefinition, initialC } from '../config/fractalConfig';
 
 // The page of one fractal: its definition typeset by MathJax and a canvas to render it.
 const FractalPage: React.FC<{ fractal: FractalDefinition }> = ({ fractal }) => {
@@ -25,7 +25,7 @@ const FractalPage: React.FC<{ fractal: FractalDefinition }> = ({ fractal }) => {
           {`\\[
             \\begin{cases}
             \\begin{align}
-              ${fractal.formula.join(' \\\\\n              \\\\[0.01em]\n              ')}
+              ${fractal.formula(initialC(fractal)).join(' \\\\\n              \\\\[0.01em]\n              ')}
             \\end{align}
             \\end{cases}
           \\]`}
