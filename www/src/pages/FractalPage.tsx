@@ -1,11 +1,13 @@
-import React from 'react';
-import FractalCanvas from '../components/FractalCanvas';
+import React, { useState } from 'react';
+import FractalSimulator from '../components/FractalSimulator';
 import { useMathJax } from '../hooks/useMathJax';
 import { FractalDefinition, initialC } from '../config/fractalConfig';
 
-// The page of one fractal: its definition typeset by MathJax and a canvas to render it.
+// The page of one fractal: its definition typeset by MathJax and a simulator to explore it.
 const FractalPage: React.FC<{ fractal: FractalDefinition }> = ({ fractal }) => {
   const mathRef = useMathJax<HTMLDivElement>();
+  // The Julia set's c, shown by the formula and rendered by the simulator
+  const [c, setC] = useState(() => initialC(fractal));
 
   return (
     <>
@@ -25,16 +27,14 @@ const FractalPage: React.FC<{ fractal: FractalDefinition }> = ({ fractal }) => {
           {`\\[
             \\begin{cases}
             \\begin{align}
-              ${fractal.formula(initialC(fractal)).join(' \\\\\n              \\\\[0.01em]\n              ')}
+              ${fractal.formula(c).join(' \\\\\n              \\\\[0.01em]\n              ')}
             \\end{align}
             \\end{cases}
           \\]`}
         </div>
       </div>
 
-      <div className="mt-3">
-        <FractalCanvas fractal={fractal} redrawOnClick />
-      </div>
+      <FractalSimulator fractal={fractal} c={c} onCChange={setC} />
     </>
   );
 };

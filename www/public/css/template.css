@@ -134,6 +134,21 @@ canvas.btn-pop {
   background-color: #000;
 }
 
+/* The zoom simulator of a fractal page: a square canvas of up to 600 px, controls as wide */
+.fractal-simulator canvas {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  background-color: #000;
+  border-radius: 5px;
+}
+.fractal-simulator .simulator-controls {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
 .marker {
   display: inline;
   background-image: linear-gradient(90deg, #FFFE03, #FFFE03);
