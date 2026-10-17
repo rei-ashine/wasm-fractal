@@ -151,15 +151,25 @@ export function useFractalWorkers() {
           if (res.error) {
             console.warn(`Chunk ${res.id} failed:`, res.error);
           } else if (res.data) {
-            const imgData = new ImageData(res.data as any, px_w, px_h);
-            chunkCtx.putImageData(imgData, px_x, px_y);
+            // A chunk that cannot be drawn (e.g. zero-size on a tiny canvas) warns like a failed
+            // one, so it is still counted and the render completes
+            try {
+              const imgData = new ImageData(res.data as any, px_w, px_h);
+              chunkCtx.putImageData(imgData, px_x, px_y);
+            } catch (err) {
+              console.warn(`Chunk ${res.id} could not be drawn:`, err);
+            }
           }
           
           chunksCompleted++;
           if (chunksCompleted === totalChunks) {
             if (offscreen) {
-              ctx.imageSmoothingEnabled = true;
-              ctx.drawImage(offscreen, 0, 0, canvasWidth, canvasHeight);
+              try {
+                ctx.imageSmoothingEnabled = true;
+                ctx.drawImage(offscreen, 0, 0, canvasWidth, canvasHeight);
+              } catch (err) {
+                console.warn('The low-resolution image could not be stretched:', err);
+              }
             }
             setElapsed(Math.round(performance.now() - start_time));
             setIsRendering(false);
