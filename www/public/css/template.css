@@ -134,6 +134,46 @@ canvas.btn-pop {
   background-color: #000;
 }
 
+/* The zoom simulator of a fractal page: a square canvas of up to 600 px, controls as wide */
+.fractal-simulator canvas {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  background-color: #000;
+  border-radius: 5px;
+  /* The gestures zoom and move the view: no browser scrolling or page zoom on the canvas */
+  touch-action: none;
+  cursor: grab;
+}
+.fractal-simulator canvas:active {
+  cursor: grabbing;
+}
+.fractal-simulator .simulator-controls {
+  max-width: 600px;
+  margin: 0 auto;
+}
+/* Fast taps on − / + / Reset are not a double-tap page zoom */
+.fractal-simulator .btn {
+  touch-action: manipulation;
+}
+/* One line high even when empty, so nothing below moves during a gesture */
+.fractal-simulator .simulator-status {
+  min-height: 1.5em;
+}
+
+/* Monospace digits line up in the inputs */
+.fractal-simulator .form-control {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+/* iOS Safari zooms the page into a focused input with text under 16px */
+@media (pointer: coarse) {
+  .fractal-simulator .form-control {
+    font-size: 16px;
+  }
+}
+
 .marker {
   display: inline;
   background-image: linear-gradient(90deg, #FFFE03, #FFFE03);

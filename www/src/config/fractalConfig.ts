@@ -1,6 +1,7 @@
 import type { FractalType } from '../workers/fractalWorker';
 
-// The region of the complex plane each fractal is first rendered with.
+// The region of the complex plane each fractal is first rendered with. It is square,
+// like the canvas, so the picture is not stretched.
 export interface FractalView {
   x_min: number;
   x_max: number;
@@ -12,6 +13,11 @@ export interface FractalView {
   imaginary?: number;
 }
 
+export interface Complex {
+  re: number;
+  im: number;
+}
+
 export interface FractalDefinition {
   type: FractalType;
   // Route path, without the leading slash
@@ -21,9 +27,21 @@ export interface FractalDefinition {
   // The page reads "A complex number \( variable \) is in {setName} if, ..."
   variable: string;
   setName: string;
-  // Lines of the TeX align environment that defines the iteration
-  formula: string[];
+  // Lines of the TeX align environment that defines the iteration, for the given c.
+  // Only the Julia set shows c; the other formulas ignore it.
+  formula: (c: Complex) => string[];
   view: FractalView;
+}
+
+// The complex parameter a page starts with (the Julia set's c): the view's real and
+// imaginary parts, 0 where it has none
+export function initialC(def: FractalDefinition): Complex {
+  return { re: def.view.real ?? 0, im: def.view.imaginary ?? 0 };
+}
+
+// A complex number as TeX, e.g. "-0.7269 + 0.1889i"
+export function complexTeX(c: Complex): string {
+  return `${c.re} ${c.im < 0 ? '-' : '+'} ${Math.abs(c.im)}i`;
 }
 
 // Every fractal on the site, in gallery and menu order. Adding an entry here adds its
@@ -35,15 +53,15 @@ export const FRACTALS: readonly FractalDefinition[] = [
     title: 'Julia Set',
     variable: 'z_0',
     setName: 'the filled-in Julia set',
-    formula: [
+    formula: (c) => [
       String.raw`z_{n+1} &= z_n^2 + c`,
-      String.raw`c &= -0.7269 + 0.1889i`,
+      `c &= ${complexTeX(c)}`,
     ],
     view: {
       x_min: -2.0,
       x_max: 2.0,
-      y_min: -1.5,
-      y_max: 1.5,
+      y_min: -2.0,
+      y_max: 2.0,
       max_iter: 1000,
       real: -0.7269,
       imaginary: 0.1889,
@@ -55,15 +73,15 @@ export const FRACTALS: readonly FractalDefinition[] = [
     title: 'Mandelbrot Set',
     variable: 'c',
     setName: 'the Mandelbrot set',
-    formula: [
+    formula: () => [
       String.raw`z_0 &= 0`,
       String.raw`z_{n+1} &= z_n^2 + c`,
     ],
     view: {
       x_min: -2.0,
       x_max: 1.0,
-      y_min: -1.0,
-      y_max: 1.0,
+      y_min: -1.5,
+      y_max: 1.5,
       max_iter: 300,
       real: 0.0,
       imaginary: 0.0,
@@ -75,7 +93,7 @@ export const FRACTALS: readonly FractalDefinition[] = [
     title: 'Burning Ship',
     variable: 'c',
     setName: 'the Burning Ship fractal',
-    formula: [
+    formula: () => [
       String.raw`z_0 &= 0`,
       String.raw`z_{n+1} &= \left( |\mathrm{Re}\,z_n| + i\,|\mathrm{Im}\,z_n| \right)^2 + c`,
     ],
@@ -94,7 +112,7 @@ export const FRACTALS: readonly FractalDefinition[] = [
     title: 'Celtic Mandelbrot',
     variable: 'c',
     setName: 'the Celtic Mandelbrot set',
-    formula: [
+    formula: () => [
       String.raw`z_0 &= 0`,
       String.raw`z_{n+1} &= \left| \mathrm{Re}\left( z_n^2 \right) \right| + i\,\mathrm{Im}\left( z_n^2 \right) + c`,
     ],

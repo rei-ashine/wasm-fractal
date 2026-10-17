@@ -1,7 +1,7 @@
 name: Test
 
-# Run the Rust tests on every branch except main (main runs them in deploy.yml),
-# so changes are checked before they are merged and deployed.
+# Run the Rust and frontend logic tests on every branch except main (main runs them
+# in deploy.yml), so changes are checked before they are merged and deployed.
 on:
   push:
     branches-ignore:
@@ -24,3 +24,12 @@ jobs:
       - name: Test Rust
         # test-fast: release optimizations without LTO (see Cargo.toml)
         run: cargo test --profile test-fast
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Test frontend logic
+        working-directory: ./www
+        run: node --test "src/**/*.test.ts"
