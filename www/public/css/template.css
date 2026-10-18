@@ -1,6 +1,9 @@
+/* clip, not hidden: hidden on both made body a scroll container, so the page scrolled inside
+   body instead of the window. Then the browser could not restore the position on Back, and a
+   new page kept the position of the one before. */
 html,
 body {
-  overflow-x: hidden; /* Prevent display collapse */
+  overflow-x: clip; /* Prevent display collapse */
   height: 100%;
   width: 100%;
 }
@@ -165,18 +168,27 @@ canvas.btn-pop {
     color: #6c757d;
     background-color: transparent;
   }
-  .fractal-simulator .btn-primary:hover:not(:active),
-  .fractal-simulator .btn-primary:focus:not(:focus-visible):not(:active) {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-  }
   .fractal-simulator .btn:focus:not(:focus-visible) {
     box-shadow: none;
   }
 }
-/* One line high even when empty, so nothing below moves during a gesture */
+/* At the right end of the toolbar, wide enough for "Rendered in 12345 ms" whether empty or not,
+   so the toolbar does not wrap differently, and move the inputs, as a render starts and ends */
 .fractal-simulator .simulator-status {
-  min-height: 1.5em;
+  margin-left: auto;
+  min-width: 11em;
+  text-align: right;
+  font-size: 0.8rem;
+}
+/* Fingers need targets of 44 px */
+@media (pointer: coarse) {
+  .fractal-simulator .simulator-toolbar .btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .fractal-simulator .input-group .btn {
+    min-width: 44px;
+  }
 }
 
 /* Monospace digits line up in the inputs */

@@ -11,6 +11,7 @@ import {
   minWidthLimit,
   panBy,
   parseNumber,
+  toggleSign,
   previewTransform,
   rangeCenter,
   rangeFromCenter,
@@ -143,4 +144,9 @@ test('parseNumber', () => {
   assert.equal(parseNumber('3.47e9'), 3.47e9); assert.equal(parseNumber(' -0.5 '), -0.5);
   assert.equal(parseNumber('1,250'), 1250);
   for (const bad of ['abc', '', 'Infinity', '1e400']) assert.equal(parseNumber(bad), null);
+});
+test('toggleSign', () => {                                      // The ± button of a signed input
+  assert.equal(toggleSign('0.25'), '-0.25'); assert.equal(toggleSign('-0.25'), '0.25');
+  assert.equal(toggleSign(' -1.5 '), '1.5'); assert.equal(toggleSign('+2'), '-2');
+  assert.equal(toggleSign(''), '-'); assert.equal(toggleSign('-'), '');
 });
