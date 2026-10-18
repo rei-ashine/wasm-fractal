@@ -2,8 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import FractalCanvas from '../components/FractalCanvas';
 import { FRACTALS } from '../config/fractalConfig';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const Home: React.FC = () => {
+  usePageTitle('Gallery');
   return (
     <>
       <div className="mt-3">

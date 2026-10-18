@@ -2,6 +2,8 @@
 name = "wasm-fractal"
 version = "1.2.0"
 edition = "2024"
+description = "Julia, Mandelbrot, Burning Ship and Celtic Mandelbrot fractals rendered in WebAssembly"
+repository = "https://github.com/rei-ashine/wasm-fractal"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
