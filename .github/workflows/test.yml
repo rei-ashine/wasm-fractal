@@ -1,7 +1,8 @@
 name: Test
 
-# Run the Rust and frontend logic tests on every branch except main (main runs them
-# in deploy.yml), so changes are checked before they are merged and deployed.
+# Run the Rust tests, the frontend logic tests and the browser tests of the built site on every
+# branch except main (main runs all but the browser tests in deploy.yml), so changes are checked
+# before they are merged and deployed.
 on:
   push:
     branches-ignore:
@@ -20,6 +21,22 @@ jobs:
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        # The same pinned, checksum-verified release as deploy.yml
+        env:
+          WASM_PACK_VERSION: 0.15.0
+          WASM_PACK_SHA256: c09f971ecaed9a2efc80fdcea7a00ef6b53c7fadc8c57d1f61b53a6aa66b668a
+        run: |
+          name="wasm-pack-v${WASM_PACK_VERSION}-x86_64-unknown-linux-musl"
+          curl -sSfL -o "$RUNNER_TEMP/wasm-pack.tar.gz" \
+            "https://github.com/wasm-bindgen/wasm-pack/releases/download/v${WASM_PACK_VERSION}/${name}.tar.gz"
+          echo "${WASM_PACK_SHA256}  $RUNNER_TEMP/wasm-pack.tar.gz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/wasm-pack.tar.gz" -C "$RUNNER_TEMP"
+          install -m 755 "$RUNNER_TEMP/${name}/wasm-pack" "$HOME/.cargo/bin/wasm-pack"
+          wasm-pack --version
 
       - name: Test Rust
         # test-fast: release optimizations without LTO (see Cargo.toml)
@@ -30,6 +47,30 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Test frontend logic
+      - name: Build Wasm
+        run: wasm-pack build --target bundler
+
+      - name: Test and build frontend
         working-directory: ./www
-        run: node --test "src/**/*.test.ts"
+        run: |
+          npm ci
+          node --test "src/**/*.test.ts"
+          npx tsc --noEmit
+          npm run build
+
+      - name: Browser tests
+        # The built site in Chromium, as a phone and a desktop (playwright.config.ts)
+        working-directory: ./www
+        run: |
+          npx playwright install --with-deps chromium
+          npx playwright test
+
+      - name: Upload the browser test report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            www/playwright-report
+            www/test-results
+          retention-days: 7

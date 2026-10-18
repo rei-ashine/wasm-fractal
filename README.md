@@ -19,6 +19,17 @@ DATE: Jul. 8th, 2026
 2. Add a variant to `FractalKind` in `src/lib.rs` and its arm in `generate_fractal`. The variant's string becomes the fractal's `type` on the JS side.
 3. Add an entry to `FRACTALS` in `www/src/config/fractalConfig.ts`. Its gallery card, menu link and page are generated from it.
 
+## Testing
+
+```sh
+cargo test --profile test-fast        # the fractals (Rust)
+cd www
+node --test "src/**/*.test.ts"        # the view math and the fractal config
+npm run build && npm run test:e2e     # the built site in Chromium, as a phone and a desktop
+```
+
+The browser tests need Playwright's Chromium once (`npx playwright install chromium`). They serve Bootstrap and MathJax from their npm packages instead of the CDN, and block Google Tag Manager.
+
 ## Directory Structure
 
 ```text
@@ -53,11 +64,16 @@ DATE: Jul. 8th, 2026
 │   ├── mandelbrot.rs
 │   └── utils.rs
 └── www
+    ├── e2e
+    │   ├── fixtures.ts
+    │   ├── simulator.spec.ts
+    │   └── site.spec.ts
     ├── index.html
     ├── LICENSE-APACHE
     ├── LICENSE-MIT
     ├── package-lock.json
     ├── package.json
+    ├── playwright.config.ts
     ├── public
     │   ├── assets
     │   │   ├── GitHub-Mark-120px-plus.png
@@ -104,7 +120,7 @@ DATE: Jul. 8th, 2026
     ├── tsconfig.json
     └── vite.config.ts
 
-21 directories, 59 files
+22 directories, 63 files
 ```
 
 ---
@@ -114,11 +130,11 @@ DATE: Jul. 8th, 2026
  Language              Files        Lines         Code     Comments       Blanks
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  CSS                       1          243          207           25           11
- JSON                      3         1965         1965            0            0
- Markdown                  2          206            0          174           32
+ JSON                      3         2062         2062            0            0
+ Markdown                  2          222            0          187           35
  TOML                      1           29           22            2            5
  TSX                      11          833          677           72           84
- TypeScript               14         1320         1027          161          132
+ TypeScript               18         1593         1253          183          157
 ─────────────────────────────────────────────────────────────────────────────────
  HTML                      1           33           24            9            0
  |- JavaScript             1            5            5            0            0
@@ -128,7 +144,7 @@ DATE: Jul. 8th, 2026
  |- Markdown               2           36            0           32            4
  (Total)                              913          626          153          134
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- Total                    40         5547         4553          596          398
+ Total                    44         5933         4876          631          426
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
