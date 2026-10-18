@@ -60,19 +60,8 @@ img.ribbon {
 .overlay a:hover, .overlay a:focus {
   color: #333;
 }
-.overlay {
-  position: absolute;
-  top: 20px;
-  right: 45px;
-  font-size: 40px;
-}
 @media screen and (max-height: 450px) {
   .overlay a {font-size: 20px}
-  .overlay {
-    font-size: 40px;
-    top: 15px;
-    right: 35px;
-  }
 }
 
 .menu-btn {
@@ -137,7 +126,11 @@ canvas.btn-pop {
   background-color: #000;
 }
 
-/* The zoom simulator of a fractal page: a square canvas of up to 600 px, controls as wide */
+/* The zoom simulator of a fractal page: a square canvas of up to 600 px, controls as wide.
+   As far above the footer as the last gallery card (its 1rem status margin and 1.5rem mb-4) */
+.fractal-simulator {
+  margin-bottom: 2.5rem;
+}
 .fractal-simulator canvas {
   display: block;
   width: 100%;
