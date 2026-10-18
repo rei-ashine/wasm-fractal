@@ -3,9 +3,11 @@ import FractalSimulator from '../components/FractalSimulator';
 import MathBlock from '../components/MathBlock';
 import { useMathJax } from '../hooks/useMathJax';
 import { FractalDefinition, initialC } from '../config/fractalConfig';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 // The page of one fractal: its definition typeset by MathJax and a simulator to explore it.
 const FractalPage: React.FC<{ fractal: FractalDefinition }> = ({ fractal }) => {
+  usePageTitle(fractal.title);
   const mathRef = useMathJax<HTMLDivElement>();
   // The Julia set's c, shown by the formula and rendered by the simulator
   const [c, setC] = useState(() => initialC(fractal));

@@ -1,11 +1,11 @@
 import React from 'react';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const Privacy: React.FC = () => {
+  usePageTitle('Privacy Policy');
   return (
     <div style={{ textAlign: 'left' }}>
-      <p>
-        <h1 className="display-4" style={{ textAlign: 'center' }}>Privacy Policy</h1>
-      </p>
+      <h1 className="display-4 mb-3" style={{ textAlign: 'center' }}>Privacy Policy</h1>
       <br />
 
       <p>

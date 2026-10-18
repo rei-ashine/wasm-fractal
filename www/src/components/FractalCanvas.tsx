@@ -19,8 +19,12 @@ const FractalCanvas: React.FC<FractalCanvasProps> = ({ fractal }) => {
 
   return (
     <>
+      {/* An image named after the fractal, so its gallery link reads "Julia Set Rendered in … ms",
+          not the render time alone */}
       <canvas
         ref={canvasRef}
+        role="img"
+        aria-label={fractal.title}
         className="btn-pop"
         style={{
           width: '300px',

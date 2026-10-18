@@ -38,7 +38,13 @@ img.ribbon {
   left: 0;
   background-color: #fff;
   overflow-x: hidden;
-  transition: 0.5s;
+  /* Closed, the links are hidden from the tab order and screen readers too, once it has slid shut */
+  visibility: hidden;
+  transition: width 0.5s, visibility 0s 0.5s;
+}
+.overlay.open {
+  visibility: visible;
+  transition: width 0.5s;
 }
 .overlay-content {
   position: relative;
@@ -54,7 +60,9 @@ img.ribbon {
   font-size: 36px;
   color: #333;
   display: block;
-  transition: 0.3s;
+  /* Only the color: a transition of every property would also ease in the visibility the links
+     inherit from the menu, leaving them hidden, and not focusable, as the menu opens */
+  transition: color 0.3s;
   font-weight: 500;
 }
 .overlay a:hover, .overlay a:focus {
@@ -74,6 +82,14 @@ img.ribbon {
   justify-content: center;
   align-items: center;
   z-index: 90;
+  /* A <button>, drawn as the three bars only */
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.menu-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: -6px;
 }
 .menu-btn span,
 .menu-btn span:before,
@@ -93,19 +109,17 @@ img.ribbon {
   top: 8px;
 }
 
-#menu-btn-check:checked ~ .menu-btn span {
+/* Open, the three bars turn into a cross */
+.menu-btn[aria-expanded="true"] span {
   background-color: rgba(255, 255, 255, 0);
 }
-#menu-btn-check:checked ~ .menu-btn span::before {
+.menu-btn[aria-expanded="true"] span::before {
   bottom: 0;
   transform: rotate(45deg);
 }
-#menu-btn-check:checked ~ .menu-btn span::after {
+.menu-btn[aria-expanded="true"] span::after {
   top: 0;
   transform: rotate(-45deg);
-}
-#menu-btn-check {
-    display: none;
 }
 
 .btn-pop {

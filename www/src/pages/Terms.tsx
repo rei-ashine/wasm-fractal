@@ -1,11 +1,11 @@
 import React from 'react';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const Terms: React.FC = () => {
+  usePageTitle('Terms of Service');
   return (
     <div style={{ textAlign: 'left' }}>
-      <p>
-        <h1 className="display-4" style={{ textAlign: 'center' }}>Terms of Service</h1>
-      </p>
+      <h1 className="display-4 mb-3" style={{ textAlign: 'center' }}>Terms of Service</h1>
       <br />
 
       <p>

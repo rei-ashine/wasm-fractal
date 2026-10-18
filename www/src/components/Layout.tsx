@@ -1,9 +1,25 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { FRACTALS } from '../config/fractalConfig';
 
 const Layout: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const firstMenuLinkRef = useRef<HTMLAnchorElement>(null);
+
+  // The open menu takes the focus, which would otherwise stay behind it on the page, and
+  // Escape closes it, giving the focus back to the menu button
+  useEffect(() => {
+    if (!menuOpen) return;
+    firstMenuLinkRef.current?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      setMenuOpen(false);
+      menuButtonRef.current?.focus();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [menuOpen]);
   const location = useLocation();
 
   // PrivacyとTermsページではGitHubアイコンを非表示にする要件
@@ -12,26 +28,29 @@ const Layout: React.FC = () => {
   return (
     <div className="container d-flex w-100 h-100 p-3 m-auto flex-column">
       <header>
-        <div id="Navigation" className="overlay" style={{ width: menuOpen ? '100%' : '0%' }}>
+        <nav id="Navigation" aria-label="Fractals" className={`overlay${menuOpen ? ' open' : ''}`} style={{ width: menuOpen ? '100%' : '0%' }}>
           <div className="overlay-content">
-            <Link to="/" onClick={() => setMenuOpen(false)}><span className="marker">Gallery</span></Link>
+            <Link ref={firstMenuLinkRef} to="/" onClick={() => setMenuOpen(false)}><span className="marker">Gallery</span></Link>
             {FRACTALS.map((fractal) => (
               <Link key={fractal.type} to={`/${fractal.path}`} onClick={() => setMenuOpen(false)}><span className="marker">{fractal.title}</span></Link>
             ))}
           </div>
-        </div>
+        </nav>
       </header>
 
       <nav className="navbar navbar-dark bg-dark fixed-top">
         <Link className="navbar-brand p-3" to="/" style={{ fontSize: '25px' }}>Fractals</Link>
         <div className="hamburger-menu">
-          <input 
-            type="checkbox" 
-            id="menu-btn-check" 
-            checked={menuOpen}
-            onChange={(e) => setMenuOpen(e.target.checked)}
-          />
-          <label htmlFor="menu-btn-check" className="menu-btn" id="menu"><span></span></label>
+          <button
+            ref={menuButtonRef}
+            type="button"
+            className="menu-btn"
+            id="menu"
+            aria-label="Menu"
+            aria-expanded={menuOpen}
+            aria-controls="Navigation"
+            onClick={() => setMenuOpen((open) => !open)}
+          ><span></span></button>
         </div>
       </nav>
 
