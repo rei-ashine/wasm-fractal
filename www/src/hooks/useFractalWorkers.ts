@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useId } from 'react';
+import { useState, useCallback, useEffect, useId, useRef } from 'react';
 import { FractalType, WorkerRequest } from '../workers/fractalWorker';
 import { getWorkerPool } from '../workers/workerPool';
 
@@ -21,6 +21,10 @@ export interface RenderParams {
   scale?: number;
   // Upper limit for devicePixelRatio (default: no limit)
   pixelRatioCap?: number;
+  // The image is computed in chunks x chunks pieces (default 8). Smaller pieces spread the work
+  // more evenly over the workers, and a cancelled render frees them sooner, since a piece
+  // already running cannot be stopped.
+  chunks?: number;
 }
 
 // Canvas size in device pixels (CSS size x devicePixelRatio, for Retina screens), optionally capped
@@ -43,6 +47,9 @@ export function useFractalWorkers() {
   // Jobs from this hook form one group in the shared pool, so cancelling them
   // does not affect other canvases rendering at the same time.
   const group = useId();
+  // The canvas the chunks of a render below full scale are drawn on, kept for the next one:
+  // iOS Safari frees a dropped canvas late and stops drawing past its canvas memory limit
+  const offscreenRef = useRef<HTMLCanvasElement | null>(null);
 
   // When unmounting, we should cancel any pending jobs.
   useEffect(() => {
@@ -62,11 +69,12 @@ export function useFractalWorkers() {
 
     const {
       canvas, type, x_min, x_max, y_min, y_max, max_iter, real = 0, imaginary = 0,
-      clear = true, scale = 1, pixelRatioCap,
+      clear = true, scale = 1, pixelRatioCap, chunks = 8,
     } = params;
     const ctx = canvas.getContext('2d', { alpha: false });
     // Below full scale, chunks go to an offscreen canvas that is stretched over the canvas at the end
-    const offscreen = scale < 1 ? document.createElement('canvas') : null;
+    if (scale < 1 && !offscreenRef.current) offscreenRef.current = document.createElement('canvas');
+    const offscreen = scale < 1 ? offscreenRef.current : null;
     const chunkCtx = offscreen ? offscreen.getContext('2d') : ctx;
     if (!ctx || !chunkCtx) {
       console.warn('2D canvas context is not available');
@@ -89,14 +97,13 @@ export function useFractalWorkers() {
     // The size to compute; smaller than the canvas when scale < 1
     const renderWidth = Math.max(1, Math.floor(canvasWidth * scale));
     const renderHeight = Math.max(1, Math.floor(canvasHeight * scale));
-    if (offscreen) {
+    if (offscreen && (offscreen.width !== renderWidth || offscreen.height !== renderHeight)) {
       offscreen.width = renderWidth;
       offscreen.height = renderHeight;
     }
 
-    // 8x8 chunks is usually a good balance of job queue distribution
-    const chunksX = 8;
-    const chunksY = 8;
+    const chunksX = chunks;
+    const chunksY = chunks;
     
     const totalChunks = chunksX * chunksY;
     let chunksCompleted = 0;

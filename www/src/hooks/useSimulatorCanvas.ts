@@ -8,6 +8,9 @@ import { physicalCanvasSize, useFractalWorkers } from './useFractalWorkers';
 export const PIXEL_RATIO_CAP = 2;
 // The quick pass computes this fraction of the resolution, without antialiasing
 export const QUICK_SCALE = 0.25;
+// The full pass is computed in FULL_CHUNKS x FULL_CHUNKS pieces: on a slow deep view, the pieces
+// of a cancelled render still running hold the workers for a quarter of the time of 8 x 8
+const FULL_CHUNKS = 16;
 // A narrower canvas (not laid out, or hidden) is not rendered: its quick pass would be under
 // 8 px, so some of the 8x8 chunks would be empty
 const MIN_RENDER_PIXELS = 32;
@@ -36,6 +39,9 @@ export function useSimulatorCanvas(type: FractalType, canvasRef: RefObject<HTMLC
   const sceneRef = useRef<Scene | null>(null);
   // A copy of the canvas taken when a preview starts, and the range it shows
   const snapshotRef = useRef<{ image: HTMLCanvasElement; range: Range } | null>(null);
+  // The canvas the snapshots are copied to, kept for the next gesture: iOS Safari frees a
+  // dropped canvas late and stops drawing past its canvas memory limit
+  const snapshotCanvasRef = useRef<HTMLCanvasElement | null>(null);
   // The range to preview at the next animation frame, and that frame's request
   const pendingRangeRef = useRef<Range | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -65,9 +71,13 @@ export function useSimulatorCanvas(type: FractalType, canvasRef: RefObject<HTMLC
       // Stop the render in progress and keep the image now on the canvas to move around
       cancelRendering();
       tokenRef.current++;
-      const image = document.createElement('canvas');
-      image.width = canvas.width;
-      image.height = canvas.height;
+      const image = snapshotCanvasRef.current ?? document.createElement('canvas');
+      snapshotCanvasRef.current = image;
+      if (image.width !== canvas.width || image.height !== canvas.height) {
+        image.width = canvas.width;
+        image.height = canvas.height;
+      }
+      // The canvas is opaque, so the copy covers the last snapshot entirely
       image.getContext('2d')?.drawImage(canvas, 0, 0);
       snapshotRef.current = { image, range: scene.range };
       setStatus({ kind: 'idle' });
@@ -108,7 +118,7 @@ export function useSimulatorCanvas(type: FractalType, canvasRef: RefObject<HTMLC
       const quick = await renderFractal({ ...params, scale: QUICK_SCALE, aa_level: 1 });
       if (token !== tokenRef.current) return;
       if (!quick) { setStatus({ kind: 'idle' }); return; }
-      const full = await renderFractal({ ...params, aa_level: 3 });
+      const full = await renderFractal({ ...params, aa_level: 3, chunks: FULL_CHUNKS });
       if (token !== tokenRef.current) return;
       if (!full) { setStatus({ kind: 'idle' }); return; }
       setStatus({ kind: 'done', ms: Math.round(performance.now() - start) });

@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import SimulatorControls, { AppliedValues, ControlValues } from './SimulatorControls';
 import { Complex, FractalDefinition, initialC } from '../config/fractalConfig';
 import { useCanvasGestures } from '../hooks/useCanvasGestures';
 import { physicalCanvasSize } from '../hooks/useFractalWorkers';
 import { PIXEL_RATIO_CAP, RenderStatus, Scene, useSimulatorCanvas } from '../hooks/useSimulatorCanvas';
 import {
-  Range, autoMaxIter, clampManualMaxIter, formatCenter, formatZoom, isAtMaxZoom, limitsFor, rangeCenter,
+  Range, autoMaxIter, clampManualMaxIter, clampRange, formatCenter, formatZoom, isAtMaxZoom, limitsFor, rangeCenter,
   panBy, rangeFromCenter, rangeWidth, rangesEqual, zoomAt, zoomOf,
 } from '../utils/viewMath';
 
@@ -65,6 +65,18 @@ const FractalSimulator: React.FC<FractalSimulatorProps> = ({ fractal, c, onCChan
     const canvas = canvasRef.current;
     return limitsFor(canvas ? physicalCanvasSize(canvas, PIXEL_RATIO_CAP).width : 0);
   };
+  // The canvas side in physical pixels, for the digits of the center and the max zoom label.
+  // Measured before the first paint, so the center never shows with the digits of no canvas.
+  const [pixels, setPixels] = useState(0);
+  useLayoutEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const measure = () => setPixels(physicalCanvasSize(canvas, PIXEL_RATIO_CAP).width);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, []);
 
   // Renders the view with this c and the current iteration setting, unless that is the scene last rendered
   const commit = (view: Range, nextC: Complex) => {
@@ -183,11 +195,19 @@ const FractalSimulator: React.FC<FractalSimulatorProps> = ({ fractal, c, onCChan
     commit(rangeRef.current, c);
   }, [c]);
 
+  // More pixels make the narrowest width wider (rotating a phone, widening the window), so a
+  // view zoomed in to the limit zooms out to the new one
+  useEffect(() => {
+    if (pixels === 0) return;
+    const view = clampRange(rangeRef.current, limitsFor(pixels));
+    if (!rangesEqual(view, rangeRef.current)) moveTo(view, c);
+  }, [pixels]);
+
   const zoom = zoomOf(range, w0);
-  const zoomLabel = `×${formatZoom(zoom)}${isAtMaxZoom(range, limits()) ? ' (max)' : ''}`;
+  const zoomLabel = `×${formatZoom(zoom)}${isAtMaxZoom(range, limitsFor(pixels)) ? ' (max)' : ''}`;
   // The center has as many decimals as the width of one physical pixel needs
   const center = rangeCenter(range);
-  const pixelWidth = rangeWidth(range) / limits().pixels;
+  const pixelWidth = rangeWidth(range) / pixels;
   const showC = fractal.type === 'julia';
   const values: ControlValues = {
     centerRe: formatCenter(center.x, pixelWidth),

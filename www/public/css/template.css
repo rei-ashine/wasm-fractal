@@ -158,6 +158,22 @@ canvas.btn-pop {
 .fractal-simulator .btn {
   touch-action: manipulation;
 }
+/* Touch devices keep :hover and :focus after a tap, which left a tapped button looking
+   pressed: there, only :active fills it, and the focus ring is for the keyboard only */
+@media (hover: none) {
+  .fractal-simulator .btn-outline-secondary:hover:not(:active) {
+    color: #6c757d;
+    background-color: transparent;
+  }
+  .fractal-simulator .btn-primary:hover:not(:active),
+  .fractal-simulator .btn-primary:focus:not(:focus-visible):not(:active) {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+  .fractal-simulator .btn:focus:not(:focus-visible) {
+    box-shadow: none;
+  }
+}
 /* One line high even when empty, so nothing below moves during a gesture */
 .fractal-simulator .simulator-status {
   min-height: 1.5em;
