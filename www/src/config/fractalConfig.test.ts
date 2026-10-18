@@ -29,3 +29,7 @@ test('the other formulas do not depend on c', () => {
     assert.deepEqual(byType(t).formula({ re: 1, im: 1 }), byType(t).formula({ re: 0, im: 0 }));
   }
 });
+test('initialC is 0 for a view without one', () => {
+  assert.deepEqual(initialC(byType('burningShip')), { re: 0, im: 0 });
+  assert.deepEqual(initialC(byType('julia')), { re: -0.7269, im: 0.1889 });
+});

@@ -48,6 +48,18 @@ test('zoomAt stops at the precision limit', () => {
   // The limit is only about 10,000 float steps wide, so the width carries a relative error of about 1e-4
   near(rangeWidth(r) / minWidthLimit(-0.75, 0.1, 1200), 1, 1e-3);
 });
+test('isAtMaxZoom is false short of the limit', () => {
+  assert.equal(isAtMaxZoom(M, L), false);
+  const w = 2 * minWidthLimit(-0.75, 0.1, 1200);
+  assert.equal(isAtMaxZoom(rangeFromCenter(-0.75, 0.1, 3 / w, 3, L), L), false);
+});
+test('clampRange zooms out to the limit of a larger canvas', () => {   // A phone rotated at max zoom
+  const deep = rangeFromCenter(-0.75, 0.1, 1e15, 3, limitsFor(600));
+  const r = clampRange(deep, L);
+  near(rangeWidth(r) / minWidthLimit(-0.75, 0.1, 1200), 1, 1e-3);
+  near(rangeCenter(r).x, -0.75, 1e-12); near(rangeCenter(r).y, 0.1, 1e-12);
+  assert.equal(isAtMaxZoom(r, L), true);
+});
 test('panBy moves the image with the pointer', () => {
   const r = panBy(M, 60, -30, 600, L);
   near(r.x_min, -2.3, 1e-15); near(r.x_max, 0.7, 1e-15);
@@ -56,6 +68,10 @@ test('panBy moves the image with the pointer', () => {
 test('panBy keeps the center within 4', () => {
   const r = panBy(rangeFromCenter(3.9, 0, 1, 1, L), -600, 0, 600, L);
   near(rangeCenter(r).x, 4, 1e-12);
+});
+test('panBy keeps the center within 4 on the imaginary axis too', () => {
+  const r = panBy(rangeFromCenter(0, -3.9, 1, 1, L), 0, 600, 600, L);
+  near(rangeCenter(r).y, -4, 1e-12);
 });
 test('clampRange leaves a range within the limits untouched', () => {
   assert.deepEqual(clampRange(M, L), M);
