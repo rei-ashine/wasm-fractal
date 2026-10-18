@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import RouteScroll from './components/RouteScroll';
 import Home from './pages/Home';
 import FractalPage from './pages/FractalPage';
 import Terms from './pages/Terms';
@@ -11,6 +12,7 @@ import { FRACTALS } from './config/fractalConfig';
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <HashRouter>
+      <RouteScroll />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />

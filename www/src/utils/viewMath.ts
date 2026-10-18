@@ -181,3 +181,11 @@ export function parseNumber(text: string): number | null {
   const n = Number(s);
   return Number.isFinite(n) ? n : null;
 }
+
+// The text of a signed input with its sign flipped, for the ± button: the numeric keypad of
+// phones has no minus key. An empty input becomes "-", ready for the digits.
+export function toggleSign(text: string): string {
+  const s = text.trim();
+  if (s.startsWith('-')) return s.slice(1);
+  return '-' + (s.startsWith('+') ? s.slice(1) : s);
+}

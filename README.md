@@ -75,6 +75,7 @@ DATE: Jul. 8th, 2026
     │   │   ├── FractalSimulator.tsx
     │   │   ├── Layout.tsx
     │   │   ├── MathBlock.tsx
+    │   │   ├── RouteScroll.tsx
     │   │   └── SimulatorControls.tsx
     │   ├── config
     │   │   ├── fractalConfig.test.ts
@@ -102,7 +103,7 @@ DATE: Jul. 8th, 2026
     ├── tsconfig.json
     └── vite.config.ts
 
-21 directories, 57 files
+21 directories, 58 files
 ```
 
 ---
