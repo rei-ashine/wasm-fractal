@@ -148,7 +148,7 @@ const SimulatorControls: React.FC<SimulatorControlsProps> = ({
     <>
       {/* The wrapper is as wide as the canvas; the .row form inside keeps Bootstrap's gutters */}
       <div className="simulator-controls">
-        <div className="simulator-toolbar d-flex flex-wrap align-items-center gap-2 mt-2">
+        <div className="simulator-toolbar d-flex flex-wrap align-items-center gap-2">
           <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onZoomOut}>−</button>
           <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onZoomIn}>+</button>
           <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onReset}>Reset</button>

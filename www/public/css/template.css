@@ -165,13 +165,33 @@ canvas.btn-pop {
     box-shadow: none;
   }
 }
-/* At the right end of the toolbar, wide enough for "Rendered in 12345 ms" whether empty or not,
-   so the toolbar does not wrap differently, and move the inputs, as a render starts and ends */
+/* As far below the canvas as the formula is above it (MathJax's 1em display margin and mt-3) */
+.fractal-simulator .simulator-toolbar {
+  margin-top: 2.25rem;
+}
+/* Takes the rest of the button row and breaks inside it, as "×1.00e+12 / (max)" on the
+   narrowest phones, rather than wrapping onto a row of its own; two lines fit in 44 px buttons */
+.fractal-simulator .simulator-zoom {
+  flex: 1 1 0;
+  min-width: 0;
+  line-height: 1.2;
+  text-align: left;
+}
+/* On a row of its own, one line high even when empty: next to the buttons it would wrap onto a
+   second row once the zoom and the time get longer, and move the inputs below */
 .fractal-simulator .simulator-status {
-  margin-left: auto;
-  min-width: 11em;
+  flex-basis: 100%;
+  min-height: 1.5em;
   text-align: right;
   font-size: 0.8rem;
+}
+/* Wide enough for the longest zoom and time next to the buttons */
+@media (min-width: 576px) {
+  .fractal-simulator .simulator-status {
+    flex-basis: auto;
+    margin-left: auto;
+    min-width: 11em;
+  }
 }
 /* Fingers need targets of 44 px */
 @media (pointer: coarse) {
