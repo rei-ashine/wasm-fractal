@@ -16,6 +16,9 @@ interface FractalSimulatorProps {
   onCChange: (c: Complex) => void;
 }
 
+// How long the two-finger hint stays after the last one-finger scroll over the canvas
+const HINT_MS = 1500;
+
 function statusText(status: RenderStatus): string {
   if (status.kind === 'rendering') return 'Rendering...';
   if (status.kind === 'done') return `Rendered in ${status.ms} ms`;
@@ -124,6 +127,10 @@ const FractalSimulator: React.FC<FractalSimulatorProps> = ({ fractal, c, onCChan
     setRange(rangeRef.current);
   };
 
+  // Shown for a moment when one finger scrolls the page over the canvas
+  const [hint, setHint] = useState(false);
+  const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Wheel, drag, pinch and double tap, in CSS px of the canvas (a canvas without a size has nothing to move)
   const gestureSize = () => canvasRef.current?.clientWidth ?? 0;
   useCanvasGestures(canvasRef, {
@@ -142,6 +149,11 @@ const FractalSimulator: React.FC<FractalSimulatorProps> = ({ fractal, c, onCChan
     onGestureEnd: () => {
       showRangeNow();
       commit(rangeRef.current, c);
+    },
+    onOneFingerScroll: () => {
+      setHint(true);
+      if (hintTimerRef.current !== null) clearTimeout(hintTimerRef.current);
+      hintTimerRef.current = setTimeout(() => setHint(false), HINT_MS);
     },
   });
 
@@ -188,6 +200,7 @@ const FractalSimulator: React.FC<FractalSimulatorProps> = ({ fractal, c, onCChan
     lastSceneRef.current = null;
     if (rangeFrameRef.current !== null) cancelAnimationFrame(rangeFrameRef.current);
     rangeFrameRef.current = null;
+    if (hintTimerRef.current !== null) clearTimeout(hintTimerRef.current);
   }, []);
 
   // The first render when the page opens, and a new one when c changes
@@ -220,7 +233,10 @@ const FractalSimulator: React.FC<FractalSimulatorProps> = ({ fractal, c, onCChan
 
   return (
     <div className="fractal-simulator mt-3">
-      <canvas ref={canvasRef} aria-label="Fractal simulator: drag to move, scroll or pinch to zoom" />
+      <div className="simulator-canvas">
+        <canvas ref={canvasRef} aria-label="Fractal simulator: drag or move two fingers to move, scroll or pinch to zoom" />
+        <div className={`simulator-hint${hint ? ' show' : ''}`} aria-hidden="true">Use two fingers to move and zoom</div>
+      </div>
       <SimulatorControls
         values={values}
         zoomLabel={zoomLabel}

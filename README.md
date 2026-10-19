@@ -11,7 +11,7 @@ DATE: Jul. 8th, 2026
 - **Professional MathJax Integration**: Displays exact mathematical notations for fractals ($z_{n+1} = z_n^2 + c$) using robust React Promise chaining to prevent race conditions.
 - **Google Tag Manager (GTM) Ready**: Built-in support for GTM and GA4 analytics through strict TypeScript definitions (`global.d.ts`).
 - **Zero-Copy Data Transfer**: Uses Transferable Objects for fast pixel data transfer from Workers to the Canvas.
-- **Zoomable Simulator**: Each fractal page can be zoomed and panned with the mouse wheel, drag, pinch and double tap, and jumped to by entering the center, zoom, max iterations and (for the Julia set) the constant c.
+- **Zoomable Simulator**: Each fractal page can be zoomed and panned with the mouse wheel and drag, or on a touch screen with two fingers (one finger scrolls the page, as on an embedded map), a double tap or double click zooms in, and a view can be jumped to by entering the center, zoom, max iterations and (for the Julia set) the constant c.
 
 ## Adding a Fractal
 
@@ -43,6 +43,8 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
 │       └── specs
 │           └── 2026-10-17-zoom-simulator-design.md
 ├── GEMINI.md
+├── LICENSE-APACHE
+├── LICENSE-MIT
 ├── pkg
 │   ├── package.json
 │   ├── README.md
@@ -69,8 +71,6 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
     │   ├── simulator.spec.ts
     │   └── site.spec.ts
     ├── index.html
-    ├── LICENSE-APACHE
-    ├── LICENSE-MIT
     ├── package-lock.json
     ├── package.json
     ├── playwright.config.ts
@@ -80,7 +80,6 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
     │   │   └── rust-logo-256x256.png
     │   └── css
     │       └── template.css
-    ├── README.md
     ├── src
     │   ├── components
     │   │   ├── FractalCanvas.tsx
@@ -116,7 +115,7 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
     ├── tsconfig.json
     └── vite.config.ts
 
-21 directories, 60 files
+21 directories, 59 files
 ```
 
 ---
@@ -125,12 +124,12 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  Language              Files        Lines         Code     Comments       Blanks
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- CSS                       1          243          207           25           11
- JSON                      3         2062         2062            0            0
- Markdown                  2          222            0          187           35
- TOML                      1           29           22            2            5
- TSX                      11          833          677           72           84
- TypeScript               18         1593         1253          183          157
+ CSS                       1          279          240           28           11
+ JSON                      3         2392         2392            0            0
+ Markdown                  1          161            0          139           22
+ TOML                      1           30           23            2            5
+ TSX                      11          857          694           77           86
+ TypeScript               18         1748         1375          202          171
 ─────────────────────────────────────────────────────────────────────────────────
  HTML                      1           33           24            9            0
  |- JavaScript             1            5            5            0            0
@@ -140,9 +139,20 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
  |- Markdown               2           36            0           32            4
  (Total)                              913          626          153          134
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- Total                    44         5933         4876          631          426
+ Total                    43         6418         5379          610          429
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+## License
+
+The source code is licensed under either of
+
+- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>)
+- MIT License ([LICENSE-MIT](LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
+
+at your option.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 
 ## Reference
 

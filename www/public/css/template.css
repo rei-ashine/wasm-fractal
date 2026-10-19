@@ -31,20 +31,33 @@ img.ribbon {
 
 .overlay {
   height: 100%;
-  width: 0;
+  width: 100%;
   position: fixed;
   z-index: 1000;
   top: 0;
   left: 0;
   background-color: #fff;
   overflow-x: hidden;
-  /* Closed, the links are hidden from the tab order and screen readers too, once it has slid shut */
+  /* Slides in from the left whole: narrowing it instead rewrapped the links on every frame.
+     Closed, the links are hidden from the tab order and screen readers too, once it has slid out */
+  transform: translateX(-100%);
   visibility: hidden;
-  transition: width 0.5s, visibility 0s 0.5s;
+  transition: transform 0.5s, visibility 0s 0.5s;
 }
 .overlay.open {
+  transform: none;
   visibility: visible;
-  transition: width 0.5s;
+  transition: transform 0.5s;
+}
+/* Focused when it is opened by a tap or a click, so that Tab goes on to its links */
+.overlay:focus {
+  outline: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .overlay.open {
+    transition: none;
+  }
 }
 .overlay-content {
   position: relative;
@@ -145,20 +158,43 @@ canvas.btn-pop {
 .fractal-simulator {
   margin-bottom: 2.5rem;
 }
+.fractal-simulator .simulator-canvas {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+}
 .fractal-simulator canvas {
   display: block;
   width: 100%;
-  max-width: 600px;
   aspect-ratio: 1 / 1;
-  margin: 0 auto;
   background-color: #000;
   border-radius: 5px;
-  /* The gestures zoom and move the view: no browser scrolling or page zoom on the canvas */
-  touch-action: none;
+  /* One finger scrolls the page; two move and zoom the view, never the page */
+  touch-action: pan-x pan-y;
   cursor: grab;
 }
 .fractal-simulator canvas:active {
   cursor: grabbing;
+}
+/* Over the canvas while one finger scrolls the page across it, as on an embedded map */
+.fractal-simulator .simulator-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 1.1rem;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.fractal-simulator .simulator-hint.show {
+  opacity: 1;
 }
 .fractal-simulator .simulator-controls {
   max-width: 600px;
