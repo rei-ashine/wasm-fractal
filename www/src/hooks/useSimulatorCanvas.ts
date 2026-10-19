@@ -27,7 +27,7 @@ export type RenderStatus = { kind: 'idle' } | { kind: 'rendering' } | { kind: 'd
 // Draws the simulator canvas. preview shows another range at once by moving the last image,
 // without computing anything; render draws a scene with a quick low-resolution pass and then
 // the full pass, each over the image already on the canvas.
-export function useSimulatorCanvas(type: FractalType, canvasRef: RefObject<HTMLCanvasElement>): {
+export function useSimulatorCanvas(type: FractalType, canvasRef: RefObject<HTMLCanvasElement | null>): {
   preview: (range: Range) => void;
   render: (scene: Scene) => void;
   status: RenderStatus;

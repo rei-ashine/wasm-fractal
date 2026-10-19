@@ -43,7 +43,7 @@ function pinchOf(pointers: Map<number, Pointer>): Pinch {
 // Turns the pointer and wheel events of the canvas into pans and zooms. Pointer Events cover
 // the mouse, touch and pens alike: one pointer drags, two pinch (zooming about their midpoint
 // and moving with it), and a double tap or double click zooms in 2x at that point.
-export function useCanvasGestures(canvasRef: RefObject<HTMLCanvasElement>, handlers: GestureHandlers): void {
+export function useCanvasGestures(canvasRef: RefObject<HTMLCanvasElement | null>, handlers: GestureHandlers): void {
   // The listeners stay registered across renders and call the latest handlers
   const handlersRef = useRef(handlers);
   handlersRef.current = handlers;
