@@ -33,6 +33,8 @@ test('a link opens the next page at its top, and Back returns to the position', 
   // The footer link, clicked as a script so the test does not scroll it into view first
   await page.getByRole('link', { name: 'Privacy |' }).evaluate((a: HTMLElement) => a.click());
   await expect(page).toHaveURL(/#\/privacy$/);
+  // The router shows the new page in a transition, after the URL changes: at its top once shown
+  await expect(page.getByRole('heading', { level: 1, name: 'Privacy Policy' })).toBeVisible();
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
   await page.goBack();
   await expect(page).toHaveURL(/#\/terms$/);
@@ -52,6 +54,7 @@ test('the menu opens over the page when it is scrolled down', async ({ page }) =
   await page.getByRole('link', { name: 'Burning Ship', exact: true }).click();
   await expect(page).toHaveURL(/#\/burning-ship$/);
   await expect(page.getByRole('button', { name: 'Menu' })).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByRole('heading', { level: 1, name: 'Burning Ship' })).toBeVisible();
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
 });
 

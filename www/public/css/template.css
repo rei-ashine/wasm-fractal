@@ -169,14 +169,22 @@ canvas.btn-pop {
   aspect-ratio: 1 / 1;
   background-color: #000;
   border-radius: 5px;
-  /* One finger scrolls the page; two move and zoom the view, never the page */
+  /* One finger scrolls the page unless held first; two move and zoom the view, never the page */
   touch-action: pan-x pan-y;
   cursor: grab;
+  /* Holding a finger on it grabs the view: no callout or text selection on iOS */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* Ringed while a held finger has grabbed the view */
+.fractal-simulator .simulator-canvas.holding canvas {
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.6);
 }
 .fractal-simulator canvas:active {
   cursor: grabbing;
 }
-/* Over the canvas while one finger scrolls the page across it, as on an embedded map */
+/* Over the canvas for a moment when one finger scrolls the page across it, as on an embedded map */
 .fractal-simulator .simulator-hint {
   position: absolute;
   inset: 0;
@@ -263,6 +271,18 @@ canvas.btn-pop {
   .fractal-simulator .form-control {
     font-size: 16px;
   }
+}
+
+/* A formula being typeset lies over the one shown, out of sight, until it replaces it */
+.math-block {
+  position: relative;
+}
+.math-block > .math-pending {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  visibility: hidden;
 }
 
 .marker {

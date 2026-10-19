@@ -1,5 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { usePageTitle } from '../hooks/usePageTitle';
+
+const REPOSITORY = 'https://github.com/rei-ashine/wasm-fractal';
 
 const Terms: React.FC = () => {
   usePageTitle('Terms of Service');
@@ -9,70 +12,51 @@ const Terms: React.FC = () => {
       <br />
 
       <p>
-        Welcome to our website. By using our website, you agree to be bound by the following terms and conditions. Please read them carefully.
+        Fractals is a free, personal website run by Rei Ashine, where you can explore fractals rendered in your browser.
+        By using it, you agree to these terms.
       </p>
 
       <ol>
         <li>
-          Acceptance of terms: By using our website, you agree to be bound by these terms of service and all applicable laws and regulations and agree that you are responsible for compliance with applicable local laws.
-          You are prohibited from using or accessing this website if you disagree with any of these terms.
+          Use of the website: You may use the website freely, without an account.
+          Please do not use it in a way that breaks the law or disrupts the website for others.
         </li>
 
         <li>
-          Privacy: Your use of the website is also governed by our Privacy Policy, which details how we collect, use, and protect your data (including via Google Tag Manager).
-          By using our website, you consent to our data practices as described in the Privacy Policy.
+          Images you render: The fractal images you render with the website are yours to use, share and modify for any purpose, including commercial use.
+          Credit is appreciated but not required.
         </li>
 
         <li>
-          Use of content: The contents of our website, including text, graphics, logos, images, and software, are protected by copyright and trademark laws.
-          You may not use any content from our website for commercial purposes without our express written consent.
+          Source code: The source code of the website, including its text, is open source and available on <a href={REPOSITORY} target="_blank" rel="noopener noreferrer">GitHub</a>,
+          under the MIT License or the Apache License, Version 2.0, at your option.
+          The GitHub mark and the Rust logo are trademarks of their respective owners and are not covered by these licenses.
         </li>
 
         <li>
-          User Conduct: You are responsible for your conduct and any content you submit, post, or transmit through our website.
-          You agree to use our website only for lawful purposes and in compliance with all applicable laws and regulations.
-          You may not use our website to harass, threaten, defame others, or engage in illegal or offensive conduct.
+          Privacy: The website uses Google Tag Manager and Google Analytics, as described in the <Link to="/privacy">Privacy Policy</Link>.
+          It also loads Bootstrap and MathJax from jsDelivr and fonts from Google Fonts, whose own terms apply to those services.
         </li>
 
         <li>
-          Limitation of liability: Our website and its contents are provided "as are," and we make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability concerning the website or the information, products, services, or related graphics contained on the website for any purpose.
-          In no event will we be liable for any loss or damage, including, without limitation, indirect or consequential loss or damage, or any loss or damage arising from data loss or profits arising out of, or in connection with, the use of this website.
+          No warranty: The website is provided &quot;as is&quot;, without warranty of any kind.
+          The images are computed with floating-point arithmetic and are approximations of the mathematical sets, and the website may change or stop at any time.
         </li>
 
         <li>
-          Indemnification: You agree to indemnify and hold us and our subsidiaries, affiliates, officers, agents, employees, partners, and licensors harmless from any claim or demand, including reasonable attorneys' fees, made by any third party due to or arising out of your use of our website, your violation of the TOS, or your violation of any rights of another.
+          Limitation of liability: To the extent permitted by law, Rei Ashine is not liable for any damage arising from the use of, or the inability to use, the website.
         </li>
 
         <li>
-          Termination: We reserve the right to terminate or suspend your access to our website at any time and for any reason without notice or liability.
+          Changes: These terms may be updated. The date below shows when they last changed, and using the website after a change means you agree to the new terms.
         </li>
 
         <li>
-          Modifications: We reserve the right to modify these terms of service at any time and without notice.
-          Your continued use of our website following any changes to the TOS indicates your acceptance of those changes.
-        </li>
-
-        <li>
-          Dispute Resolution: In any dispute arising out of or in connection with this TOS or using the website, the parties shall first attempt to resolve the dispute through friendly negotiations.
-        </li>
-
-        <li>
-          Entire Agreement: This TOS constitutes the entire agreement between you and us regarding the use of our website.
-        </li>
-
-        <li>
-          Severability: If any provision of this TOS is invalid or unenforceable, the remaining provisions shall remain in full force and effect.
-        </li>
-
-        <li>
-          Waiver: The failure of us to enforce any right or provision in this TOS shall not constitute a waiver of such right or provision unless acknowledged and agreed to by us in writing.
+          Contact: Questions about these terms are welcome as an issue on <a href={`${REPOSITORY}/issues`} target="_blank" rel="noopener noreferrer">GitHub</a>.
         </li>
       </ol>
 
-      <p>
-        By using our website, you acknowledge that you have read and understood these terms of service and agree to be bound by them.
-        You should not use our website if you disagree with these terms.
-      </p>
+      <p>These terms were last updated on October 19, 2026.</p>
       <br />
     </div>
   );

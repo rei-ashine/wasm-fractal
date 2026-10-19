@@ -8,6 +8,8 @@ export const DOUBLE_TAP_MS = 300;
 export const DOUBLE_TAP_DISTANCE = 30;
 // A press that moves this many CSS px or more from where it started is a drag, not a tap
 export const TAP_SLOP = 6;
+// One finger held this long without moving TAP_SLOP grabs the view, instead of scrolling the page
+export const HOLD_MS = 400;
 
 export interface GestureHandlers {
   // CSS px: the image moves the same way as the pointer
@@ -16,8 +18,10 @@ export interface GestureHandlers {
   onZoom: (sx: number, sy: number, factor: number) => void;
   // Every pointer released, a double tap, or the wheel stopped for WHEEL_IDLE_MS
   onGestureEnd: () => void;
-  // One finger moved on the canvas: the page scrolls, and the view waits for two
+  // One finger moved on the canvas without holding first: the page scrolls
   onOneFingerScroll: () => void;
+  // One finger held still grabbed the view (true), until it is lifted (false)
+  onHold: (holding: boolean) => void;
 }
 
 interface Pointer {
@@ -43,11 +47,12 @@ function pinchOf(pointers: Map<string, Pointer>): Pinch {
 }
 
 // Turns the mouse, touch and wheel events of the canvas into pans and zooms. The mouse drags,
-// and a double click zooms in 2x at that point. Fingers work as on an embedded map: one scrolls
-// the page as anywhere else, two move the view and pinch it (zooming about their midpoint and
-// moving with it), and a double tap zooms in 2x. Touch Events, not Pointer Events, carry the
-// fingers, since only a touchmove can be cancelled, keeping the page still under two fingers;
-// pens on touch screens send them too, and work as fingers.
+// and a double click zooms in 2x at that point. One finger scrolls the page as anywhere else,
+// unless it is held still for HOLD_MS first: then it drags the view. Two fingers move the view
+// and pinch it (zooming about their midpoint and moving with it), and a double tap zooms in 2x.
+// Touch Events, not Pointer Events, carry the fingers, since only a touchmove can be cancelled,
+// keeping the page still under the fingers that move the view; pens on touch screens send them
+// too, and work as fingers.
 export function useCanvasGestures(canvasRef: RefObject<HTMLCanvasElement | null>, handlers: GestureHandlers): void {
   // The listeners stay registered across renders and call the latest handlers
   const handlersRef = useRef(handlers);
@@ -66,6 +71,13 @@ export function useCanvasGestures(canvasRef: RefObject<HTMLCanvasElement | null>
     // Whether one finger has moved, and so scrolls the page, since the first was pressed:
     // the fingers are the page's until they are all lifted
     let scrolling = false;
+    // Whether one finger held still has grabbed the view, and the timer that will grab it
+    let holding = false;
+    let holdTimer: ReturnType<typeof setTimeout> | null = null;
+    const cancelHold = () => {
+      if (holdTimer !== null) clearTimeout(holdTimer);
+      holdTimer = null;
+    };
     // The press of the last tap, waiting for a second one
     let lastTap: { time: number; x: number; y: number } | null = null;
     let wheelTimer: ReturnType<typeof setTimeout> | null = null;
@@ -118,10 +130,15 @@ export function useCanvasGestures(canvasRef: RefObject<HTMLCanvasElement | null>
       pinch = pointers.size >= 2 ? pinchOf(pointers) : null;
       if (pointers.size > 0) return;
 
-      const isTap = released && !multiTouch && !p.moved
+      const isTap = released && !multiTouch && !holding && !p.moved
         && Math.hypot(p.x - p.startX, p.y - p.startY) < TAP_SLOP;
       multiTouch = false;
       scrolling = false;
+      cancelHold();
+      if (holding) {
+        holding = false;
+        handlersRef.current.onHold(false);
+      }
       if (isTap) {
         if (lastTap && p.downTime - lastTap.time <= DOUBLE_TAP_MS
           && Math.hypot(p.startX - lastTap.x, p.startY - lastTap.y) <= DOUBLE_TAP_DISTANCE) {
@@ -174,17 +191,36 @@ export function useCanvasGestures(canvasRef: RefObject<HTMLCanvasElement | null>
     const onTouchStart = (e: TouchEvent) => {
       if (scrolling) return;
       for (const t of e.changedTouches) press(`touch${t.identifier}`, t, e.timeStamp);
-      // Two fingers neither scroll nor zoom the page
-      if (multiTouch && e.cancelable) e.preventDefault();
+      if (multiTouch) {
+        cancelHold();
+        // Two fingers neither scroll nor zoom the page
+        if (e.cancelable) e.preventDefault();
+      } else if (pointers.size === 1 && !holding) {
+        holdTimer = setTimeout(() => {
+          holdTimer = null;
+          holding = true;
+          handlersRef.current.onHold(true);
+        }, HOLD_MS);
+      }
     };
 
     const onTouchMove = (e: TouchEvent) => {
       if (scrolling) return;
+      // The page began to scroll before the finger was held long enough (the browser started
+      // sooner than TAP_SLOP): it keeps the finger, and the view lets go
+      if (holding && !multiTouch && !e.cancelable) {
+        holding = false;
+        handlersRef.current.onHold(false);
+        scrolling = true;
+        return;
+      }
       // Once two fingers were down, the one left after lifting the other moves the view on
-      for (const t of e.changedTouches) move(`touch${t.identifier}`, t, multiTouch);
-      if (multiTouch) {
+      const grabbed = multiTouch || holding;
+      for (const t of e.changedTouches) move(`touch${t.identifier}`, t, grabbed);
+      if (grabbed) {
         if (e.cancelable) e.preventDefault();
       } else if ([...pointers.values()].some((p) => p.moved)) {
+        cancelHold();
         scrolling = true;
         handlersRef.current.onOneFingerScroll();
       }
@@ -197,7 +233,7 @@ export function useCanvasGestures(canvasRef: RefObject<HTMLCanvasElement | null>
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const { x, y } = position(e);
-      handlersRef.current.onZoom(x, y, wheelZoomFactor(e.deltaY, e.deltaMode, canvas.clientHeight));
+      handlersRef.current.onZoom(x, y, wheelZoomFactor(e.deltaY, e.deltaMode, canvas.clientHeight, e.ctrlKey));
       if (wheelTimer !== null) clearTimeout(wheelTimer);
       wheelTimer = setTimeout(() => {
         wheelTimer = null;
@@ -228,6 +264,7 @@ export function useCanvasGestures(canvasRef: RefObject<HTMLCanvasElement | null>
       canvas.removeEventListener('touchcancel', onTouchEnd);
       canvas.removeEventListener('wheel', onWheel);
       if (wheelTimer !== null) clearTimeout(wheelTimer);
+      cancelHold();
     };
   }, [canvasRef]);
 }

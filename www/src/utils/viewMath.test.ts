@@ -116,6 +116,10 @@ test('wheelZoomFactor normalizes deltaMode', () => {           // Pixel, line an
   near(wheelZoomFactor(1, 2, 600), Math.exp(-0.9), 1e-12);
   assert.equal(wheelZoomFactor(0, 0, 600), 1);
 });
+test('wheelZoomFactor follows a trackpad pinch', () => {        // Its deltaY add up to -100 ln(scale)
+  near(wheelZoomFactor(-100 * Math.log(2), 0, 600, true), 2, 1e-12);
+  near(wheelZoomFactor(3, 1, 600, true), Math.exp(-0.072), 1e-12);  // Lines are a ctrl+mouse wheel
+});
 test('previewTransform matches zoomAt and panBy', () => {
   assert.deepEqual(previewTransform(M, M, 600), { x: 0, y: 0, size: 600 });
   const z = previewTransform(M, zoomAt(M, 150, 450, 2, 600, L), 600);

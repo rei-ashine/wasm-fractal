@@ -65,6 +65,9 @@ const SimulatorControls: React.FC<SimulatorControlsProps> = ({
   const [drafts, setDrafts] = useState<Drafts>(shown);
   // The inputs that could not be read when last applied
   const [invalid, setInvalid] = useState<ReadonlySet<Field>>(new Set());
+  // Whether Max iterations was typed in since the values were last shown: typing the number
+  // Auto shows fixes it there, which is a change even though the text is the same
+  const [maxIterTyped, setMaxIterTyped] = useState(false);
 
   // New values (a move, a zoom, an applied input) replace the drafts and clear the red marks.
   // A layout effect, so the old drafts are never painted next to the new view.
@@ -72,15 +75,16 @@ const SimulatorControls: React.FC<SimulatorControlsProps> = ({
   useLayoutEffect(() => {
     setDrafts(draftsOf(values));
     setInvalid(new Set());
+    setMaxIterTyped(false);
   }, [valuesKey]);
 
-  // Applies the drafts. Only the inputs that differ from what is shown are read, and with
-  // none of them there is nothing to apply.
+  // Applies the drafts. Only the inputs that differ from what is shown are read (and Max
+  // iterations typed in while Auto is on), and with none of them there is nothing to apply.
   const apply = (next: Drafts) => {
     const typed: Partial<Record<Field, number>> = {};
     const bad = new Set<Field>();
     for (const f of fields) {
-      if (next[f] === shown[f]) continue;
+      if (next[f] === shown[f] && !(f === 'maxIter' && values.auto && maxIterTyped)) continue;
       const n = parseNumber(next[f]);
       if (n === null) bad.add(f);
       else typed[f] = n;
@@ -98,6 +102,7 @@ const SimulatorControls: React.FC<SimulatorControlsProps> = ({
     });
     // Show the values again even when applying them changes nothing (a center already at its limit)
     setDrafts(shown);
+    setMaxIterTyped(false);
   };
 
   // The numeric keypad: with a decimal point, except for the iteration count
@@ -115,6 +120,7 @@ const SimulatorControls: React.FC<SimulatorControlsProps> = ({
       onChange={(e) => {
         const text = e.target.value;
         setDrafts((d) => ({ ...d, [f]: text }));
+        if (f === 'maxIter') setMaxIterTyped(true);
       }}
       onBlur={() => apply(drafts)}
       onKeyDown={(e) => {

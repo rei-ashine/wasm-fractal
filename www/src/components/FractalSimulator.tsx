@@ -16,8 +16,8 @@ interface FractalSimulatorProps {
   onCChange: (c: Complex) => void;
 }
 
-// How long the two-finger hint stays after the last one-finger scroll over the canvas
-const HINT_MS = 1500;
+// How long the hint stays after one finger starts to scroll the page over the canvas
+const HINT_MS = 800;
 
 function statusText(status: RenderStatus): string {
   if (status.kind === 'rendering') return 'Rendering...';
@@ -129,6 +129,8 @@ const FractalSimulator: React.FC<FractalSimulatorProps> = ({ fractal, c, onCChan
 
   // Shown for a moment when one finger scrolls the page over the canvas
   const [hint, setHint] = useState(false);
+  // Whether a finger held on the canvas has grabbed the view
+  const [holding, setHolding] = useState(false);
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Wheel, drag, pinch and double tap, in CSS px of the canvas (a canvas without a size has nothing to move)
@@ -154,6 +156,11 @@ const FractalSimulator: React.FC<FractalSimulatorProps> = ({ fractal, c, onCChan
       setHint(true);
       if (hintTimerRef.current !== null) clearTimeout(hintTimerRef.current);
       hintTimerRef.current = setTimeout(() => setHint(false), HINT_MS);
+    },
+    onHold: (next) => {
+      setHolding(next);
+      // A tick where phones can (not iOS Safari), as the view is grabbed
+      if (next) navigator.vibrate?.(10);
     },
   });
 
@@ -233,9 +240,9 @@ const FractalSimulator: React.FC<FractalSimulatorProps> = ({ fractal, c, onCChan
 
   return (
     <div className="fractal-simulator mt-3">
-      <div className="simulator-canvas">
-        <canvas ref={canvasRef} aria-label="Fractal simulator: drag or move two fingers to move, scroll or pinch to zoom" />
-        <div className={`simulator-hint${hint ? ' show' : ''}`} aria-hidden="true">Use two fingers to move and zoom</div>
+      <div className={`simulator-canvas${holding ? ' holding' : ''}`}>
+        <canvas ref={canvasRef} aria-label="Fractal simulator: drag, or touch and hold then drag, to move; scroll or pinch to zoom" />
+        <div className={`simulator-hint${hint ? ' show' : ''}`} aria-hidden="true">Touch and hold to move</div>
       </div>
       <SimulatorControls
         values={values}
