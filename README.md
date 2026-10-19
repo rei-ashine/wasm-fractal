@@ -77,13 +77,9 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
     ├── public
     │   ├── assets
     │   │   ├── GitHub-Mark-120px-plus.png
-    │   │   ├── GitHub-Mark-Light-120px-plus.png
     │   │   └── rust-logo-256x256.png
-    │   ├── css
-    │   │   └── template.css
-    │   └── png
-    │       ├── julia.png
-    │       └── mandelbrot.png
+    │   └── css
+    │       └── template.css
     ├── README.md
     ├── src
     │   ├── components
@@ -120,7 +116,7 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
     ├── tsconfig.json
     └── vite.config.ts
 
-22 directories, 63 files
+21 directories, 60 files
 ```
 
 ---
