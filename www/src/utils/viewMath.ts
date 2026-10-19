@@ -28,6 +28,9 @@ export const MANUAL_MAX_ITER_MAX = 100000;
 export const WHEEL_ZOOM_SPEED = 0.0015;
 // CSS px per line for wheel events with deltaMode 1
 export const WHEEL_LINE_HEIGHT = 16;
+// A trackpad pinch comes as wheel events with ctrlKey whose deltaY add up to -100 ln(scale)
+// (measured in Chromium), so exp(-deltaY * PINCH_ZOOM_SPEED) follows the fingers
+export const PINCH_ZOOM_SPEED = 0.01;
 
 export function limitsFor(pixels: number): Limits {
   return { maxWidth: MAX_WIDTH, maxCenter: MAX_CENTER, pixels };
@@ -142,7 +145,9 @@ export function clampManualMaxIter(n: number): number {
 
 // Zoom factor of one wheel event. deltaMode 0 counts pixels, 1 lines and 2 pages
 // (a page is pageHeight), so every kind of device gives a factor of the same size.
-export function wheelZoomFactor(deltaY: number, deltaMode: number, pageHeight: number): number {
+// A pinch (ctrlKey, in pixels) zooms as far as the fingers spread.
+export function wheelZoomFactor(deltaY: number, deltaMode: number, pageHeight: number, ctrlKey = false): number {
+  if (ctrlKey && deltaMode === 0) return Math.exp(-deltaY * PINCH_ZOOM_SPEED);
   const unit = deltaMode === 1 ? WHEEL_LINE_HEIGHT : deltaMode === 2 ? pageHeight : 1;
   return Math.exp(-deltaY * unit * WHEEL_ZOOM_SPEED);
 }

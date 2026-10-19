@@ -2,21 +2,25 @@ export {};
 
 let mathJaxPromise = Promise.resolve();
 
-// Run MathJax calls one after another to avoid "Typeset in progress" errors.
-const enqueue = (label: string, task: () => unknown) => {
+// Run MathJax calls one after another to avoid "Typeset in progress" errors. Resolves once
+// this call is done, failed or not.
+const enqueue = (label: string, task: () => unknown): Promise<void> => {
   mathJaxPromise = mathJaxPromise
     .then(task)
     .then(() => undefined)
     .catch((err) => {
       console.warn(`MathJax ${label} failed: `, err);
     });
+  return mathJaxPromise;
 };
 
-export const typesetMathJax = (element: HTMLElement) => {
+// Resolves once the element is typeset, or at once if MathJax has not loaded yet (its startup
+// typesets the whole page then)
+export const typesetMathJax = (element: HTMLElement): Promise<void> => {
   const mathJax = window.MathJax;
-  if (!mathJax || typeof mathJax.typesetPromise !== 'function') return;
+  if (!mathJax || typeof mathJax.typesetPromise !== 'function') return Promise.resolve();
   // Skip elements that were removed while waiting in the queue
-  enqueue('typeset', () => element.isConnected && mathJax.typesetPromise([element]));
+  return enqueue('typeset', () => element.isConnected && mathJax.typesetPromise([element]));
 };
 
 export const clearMathJax = (element: HTMLElement) => {

@@ -32,8 +32,8 @@ const FractalPage: React.FC<{ fractal: FractalDefinition }> = ({ fractal }) => {
         diverge where :
       </div>
 
-      {/* A new c makes a new formula, which MathBlock typesets again */}
-      <MathBlock key={tex} tex={tex} className="lead" />
+      {/* A new c makes a new formula, which MathBlock typesets before it replaces the old one */}
+      <MathBlock tex={tex} className="lead" />
 
       <FractalSimulator fractal={fractal} c={c} onCChange={setC} />
     </>

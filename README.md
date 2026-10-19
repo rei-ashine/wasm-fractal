@@ -11,7 +11,7 @@ DATE: Jul. 8th, 2026
 - **Professional MathJax Integration**: Displays exact mathematical notations for fractals ($z_{n+1} = z_n^2 + c$) using robust React Promise chaining to prevent race conditions.
 - **Google Tag Manager (GTM) Ready**: Built-in support for GTM and GA4 analytics through strict TypeScript definitions (`global.d.ts`).
 - **Zero-Copy Data Transfer**: Uses Transferable Objects for fast pixel data transfer from Workers to the Canvas.
-- **Zoomable Simulator**: Each fractal page can be zoomed and panned with the mouse wheel and drag, or on a touch screen with two fingers (one finger scrolls the page, as on an embedded map), a double tap or double click zooms in, and a view can be jumped to by entering the center, zoom, max iterations and (for the Julia set) the constant c.
+- **Zoomable Simulator**: Each fractal page can be zoomed and panned with the mouse wheel and drag, or on a touch screen with a held finger or two fingers (one finger scrolls the page unless held still first), a double tap or double click zooms in, and a view can be jumped to by entering the center, zoom, max iterations and (for the Julia set) the constant c.
 
 ## Adding a Fractal
 
@@ -124,12 +124,12 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  Language              Files        Lines         Code     Comments       Blanks
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- CSS                       1          279          240           28           11
+ CSS                       1          299          256           31           12
  JSON                      3         2392         2392            0            0
- Markdown                  1          161            0          139           22
+ Markdown                  1          163            0          140           23
  TOML                      1           30           23            2            5
- TSX                      11          857          694           77           86
- TypeScript               18         1748         1375          202          171
+ TSX                      11          874          697           85           92
+ TypeScript               18         1873         1475          223          175
 ─────────────────────────────────────────────────────────────────────────────────
  HTML                      1           33           24            9            0
  |- JavaScript             1            5            5            0            0
@@ -139,7 +139,7 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
  |- Markdown               2           36            0           32            4
  (Total)                              913          626          153          134
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- Total                    43         6418         5379          610          429
+ Total                    43         6582         5498          643          441
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -151,6 +151,8 @@ The source code is licensed under either of
 - MIT License ([LICENSE-MIT](LICENSE-MIT) or <https://opensource.org/licenses/MIT>)
 
 at your option.
+
+The fractal images rendered with the website may be used for any purpose; see the [Terms of Service](https://rei-ashine.github.io/wasm-fractal/#/terms).
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
 

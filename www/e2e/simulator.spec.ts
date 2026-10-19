@@ -106,11 +106,14 @@ test.describe('touch', () => {
   test.skip(({ isMobile }) => !isMobile, 'fingers on a phone');
 
   type Point = { x: number; y: number };
-  // Fingers moved in steps from where they are pressed to where they are lifted, as a phone sends them
-  async function swipe(page: Page, from: Point[], to: Point[], steps = 10) {
+  // Fingers moved in steps from where they are pressed to where they are lifted, as a phone
+  // sends them, after holding them still for holdMs
+  async function swipe(page: Page, from: Point[], to: Point[], { steps = 10, holdMs = 0 } = {}) {
     const cdp = await page.context().newCDPSession(page);
     const at = (t: number) => from.map((p, id) => ({ id, x: p.x + (to[id].x - p.x) * t, y: p.y + (to[id].y - p.y) * t }));
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: at(0) });
+    // The hold is time itself: nothing to wait for
+    if (holdMs > 0) await page.waitForTimeout(holdMs);
     for (let i = 1; i <= steps; i++) {
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: at(i / steps) });
     }
@@ -156,6 +159,22 @@ test.describe('touch', () => {
     expect(await page.evaluate(() => window.scrollY)).toBe(scrollY);
   });
 
+  test('a finger held still, then dragged, moves the view and not the page', async ({ page }) => {
+    const box = await canvasInView(page);
+    const scrollY = await page.evaluate(() => window.scrollY);
+    const cx = box.x + box.width / 2;
+    const cy = box.y + box.height / 2;
+    // Held a little longer than HOLD_MS (400 ms), then to the right: the center moves left
+    await swipe(page, [{ x: cx - 30, y: cy }], [{ x: cx + 30, y: cy + 40 }], { holdMs: 600 });
+    await waitForSimulator(page);
+    expect(Number(await input(page, 'Center Re').inputValue())).toBeLessThan(-0.6);
+    expect(Number(await input(page, 'Center Im').inputValue())).not.toBe(0);
+    expect(await page.evaluate(() => window.scrollY)).toBe(scrollY);
+    await expect(page.locator('.fractal-simulator .simulator-hint')).not.toHaveClass(/\bshow\b/);
+    // The ring of the grabbed view goes with the finger
+    await expect(page.locator('.fractal-simulator .simulator-canvas')).not.toHaveClass(/\bholding\b/);
+  });
+
   test('a double tap zooms in 2x', async ({ page }) => {
     const box = await canvasInView(page);
     const x = box.x + box.width / 2;
@@ -164,6 +183,55 @@ test.describe('touch', () => {
     await page.touchscreen.tap(x, y);
     await expect(zoomLabel(page)).toHaveText('×2');
   });
+});
+
+test('a trackpad pinch zooms as far as the fingers spread', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'a trackpad');
+  await page.goto('#/mandelbrot');
+  await waitForSimulator(page);
+  const box = (await page.locator('.fractal-simulator canvas').boundingBox())!;
+  // Chromium sends it as wheel events with ctrlKey
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Input.synthesizePinchGesture', { x: box.x + box.width / 2, y: box.y + box.height / 2, scaleFactor: 2 });
+  await waitForSimulator(page);
+  expect(Number(await input(page, 'Zoom').inputValue())).toBeCloseTo(2, 2);
+});
+
+test('typing the max iterations that Auto shows turns Auto off', async ({ page }) => {
+  await page.goto('#/mandelbrot');
+  await waitForSimulator(page);
+  const auto = page.getByRole('checkbox', { name: 'Auto' });
+  await expect(auto).toBeChecked();
+  const shown = await input(page, 'Max iterations').inputValue();
+  // Typed over, as a person does: the same text put in at once is no change to React
+  await input(page, 'Max iterations').fill('');
+  await input(page, 'Max iterations').pressSequentially(shown);
+  await page.getByRole('heading', { level: 1 }).click();
+  await expect(auto).not.toBeChecked();
+  await expect(input(page, 'Max iterations')).toHaveValue(shown);
+});
+
+test('a new c keeps the old formula until the new one is typeset', async ({ page }) => {
+  await page.goto('#/julia');
+  await waitForSimulator(page);
+  await expect(page.locator('main mjx-container').first()).toBeVisible({ timeout: 30_000 });
+  // Typesetting slowed down as on a phone, where it took long enough to see, and every frame,
+  // whether raw TeX (its backslashes) is in the visible text of the page
+  await page.evaluate(() => {
+    const w = window as unknown as { sawTeX: boolean; MathJax: { typesetPromise: (e: Element[]) => Promise<void> } };
+    const typeset = w.MathJax.typesetPromise.bind(w.MathJax);
+    w.MathJax.typesetPromise = (elements) => new Promise((r) => setTimeout(r, 300)).then(() => typeset(elements));
+    w.sawTeX = false;
+    const check = () => {
+      if (document.querySelector('main')!.innerText.includes('\\')) w.sawTeX = true;
+      requestAnimationFrame(check);
+    };
+    check();
+  });
+  await typeAndLeave(page, 'c Re', '-0.8');
+  await expect(page.locator('main')).toContainText('0.8');
+  await expect(page.locator('.math-pending')).toHaveCount(0);
+  expect(await page.evaluate(() => (window as unknown as { sawTeX: boolean }).sawTeX)).toBe(false);
 });
 
 test('the mouse drags the view', async ({ page, isMobile }) => {
