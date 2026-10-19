@@ -101,3 +101,82 @@ test('no horizontal scrolling', async ({ page }) => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   }
 });
+
+test.describe('touch', () => {
+  test.skip(({ isMobile }) => !isMobile, 'fingers on a phone');
+
+  type Point = { x: number; y: number };
+  // Fingers moved in steps from where they are pressed to where they are lifted, as a phone sends them
+  async function swipe(page: Page, from: Point[], to: Point[], steps = 10) {
+    const cdp = await page.context().newCDPSession(page);
+    const at = (t: number) => from.map((p, id) => ({ id, x: p.x + (to[id].x - p.x) * t, y: p.y + (to[id].y - p.y) * t }));
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: at(0) });
+    for (let i = 1; i <= steps; i++) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: at(i / steps) });
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  }
+
+  // The page scrolled so that the canvas fills the middle of the screen, and its box there
+  async function canvasInView(page: Page) {
+    await page.goto('#/mandelbrot');
+    await waitForSimulator(page);
+    const canvas = page.locator('.fractal-simulator canvas');
+    await canvas.evaluate((c) => c.scrollIntoView({ block: 'center', behavior: 'instant' }));
+    return (await canvas.boundingBox())!;
+  }
+
+  test('one finger scrolls the page over the canvas and shows how to move it', async ({ page }) => {
+    const box = await canvasInView(page);
+    const scrollY = await page.evaluate(() => window.scrollY);
+    const x = box.x + box.width / 2;
+    await swipe(page, [{ x, y: box.y + box.height - 20 }], [{ x, y: box.y + 20 }]);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrollY + 50);
+    await expect(page.locator('.fractal-simulator .simulator-hint')).toHaveClass(/\bshow\b/);
+    await expect(input(page, 'Center Re')).toHaveValue('-0.5000');
+    await expect(input(page, 'Center Im')).toHaveValue('0.0000');
+    // It fades once the finger has stopped
+    await expect(page.locator('.fractal-simulator .simulator-hint')).not.toHaveClass(/\bshow\b/);
+  });
+
+  test('two fingers move and pinch the view, not the page', async ({ page }) => {
+    const box = await canvasInView(page);
+    const scrollY = await page.evaluate(() => window.scrollY);
+    const cx = box.x + box.width / 2;
+    const cy = box.y + box.height / 2;
+    // Both fingers to the right: the image follows, so the center moves left
+    await swipe(page, [{ x: cx - 50, y: cy }, { x: cx + 10, y: cy }], [{ x: cx + 10, y: cy }, { x: cx + 70, y: cy }]);
+    await waitForSimulator(page);
+    expect(Number(await input(page, 'Center Re').inputValue())).toBeLessThan(-0.6);
+    await expect(input(page, 'Center Im')).toHaveValue('0.0000');
+    // Apart, then about the same midpoint: zoomed in
+    await swipe(page, [{ x: cx - 30, y: cy }, { x: cx + 30, y: cy }], [{ x: cx - 90, y: cy }, { x: cx + 90, y: cy }]);
+    await waitForSimulator(page);
+    await expect(zoomLabel(page)).not.toHaveText('×1');
+    expect(await page.evaluate(() => window.scrollY)).toBe(scrollY);
+  });
+
+  test('a double tap zooms in 2x', async ({ page }) => {
+    const box = await canvasInView(page);
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+    await page.touchscreen.tap(x, y);
+    await page.touchscreen.tap(x, y);
+    await expect(zoomLabel(page)).toHaveText('×2');
+  });
+});
+
+test('the mouse drags the view', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'a mouse');
+  await page.goto('#/mandelbrot');
+  await waitForSimulator(page);
+  const box = (await page.locator('.fractal-simulator canvas').boundingBox())!;
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height / 2;
+  await page.mouse.move(cx, cy);
+  await page.mouse.down();
+  await page.mouse.move(cx + 60, cy, { steps: 5 });
+  await page.mouse.up();
+  await waitForSimulator(page);
+  expect(Number(await input(page, 'Center Re').inputValue())).toBeLessThan(-0.6);
+});

@@ -5,13 +5,17 @@ import { FRACTALS } from '../config/fractalConfig';
 const Layout: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
   const firstMenuLinkRef = useRef<HTMLAnchorElement>(null);
+  // Whether the menu button was last pressed with the keyboard, not tapped or clicked
+  const openedByKeyboardRef = useRef(false);
 
   // The open menu takes the focus, which would otherwise stay behind it on the page, and
-  // Escape closes it, giving the focus back to the menu button
+  // Escape closes it, giving the focus back to the menu button. Opened with the keyboard the
+  // first link takes it, ringed; tapped or clicked the menu itself does, with no ring on a link.
   useEffect(() => {
     if (!menuOpen) return;
-    firstMenuLinkRef.current?.focus();
+    (openedByKeyboardRef.current ? firstMenuLinkRef : menuRef).current?.focus();
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
       setMenuOpen(false);
@@ -28,7 +32,7 @@ const Layout: React.FC = () => {
   return (
     <div className="container d-flex w-100 h-100 p-3 m-auto flex-column">
       <header>
-        <nav id="Navigation" aria-label="Fractals" className={`overlay${menuOpen ? ' open' : ''}`} style={{ width: menuOpen ? '100%' : '0%' }}>
+        <nav ref={menuRef} id="Navigation" aria-label="Fractals" tabIndex={-1} className={`overlay${menuOpen ? ' open' : ''}`}>
           <div className="overlay-content">
             <Link ref={firstMenuLinkRef} to="/" onClick={() => setMenuOpen(false)}><span className="marker">Gallery</span></Link>
             {FRACTALS.map((fractal) => (
@@ -49,7 +53,11 @@ const Layout: React.FC = () => {
             aria-label="Menu"
             aria-expanded={menuOpen}
             aria-controls="Navigation"
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={(e) => {
+              // A click from Enter or Space counts no presses
+              openedByKeyboardRef.current = e.detail === 0;
+              setMenuOpen((open) => !open);
+            }}
           ><span></span></button>
         </div>
       </nav>

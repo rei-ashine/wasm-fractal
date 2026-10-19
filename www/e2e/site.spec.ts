@@ -55,6 +55,25 @@ test('the menu opens over the page when it is scrolled down', async ({ page }) =
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
 });
 
+test('the menu slides in whole and, tapped or clicked, rings none of its links', async ({ page }) => {
+  await page.goto('#/');
+  const link = page.getByRole('link', { name: 'Mandelbrot Set', exact: true });
+  await page.getByRole('button', { name: 'Menu' }).click();
+  // While it slides, the link has the size, and so the lines, it ends with (to the pixel: the
+  // slide leaves fractions)
+  const size = async () => {
+    const { width, height } = (await link.boundingBox())!;
+    return { width: Math.round(width), height: Math.round(height) };
+  };
+  const sliding = await size();
+  const menu = page.getByRole('navigation', { name: 'Fractals' });
+  await menu.evaluate((nav) => Promise.all(nav.getAnimations().map((a) => a.finished)));
+  expect(await size()).toEqual(sliding);
+  // The menu itself has the focus, so Tab goes on to its links
+  await expect(menu).toBeFocused();
+  await expect(page.getByRole('link', { name: 'Gallery', exact: true })).not.toBeFocused();
+});
+
 test.describe('keyboard', () => {
   test.skip(({ isMobile }) => isMobile, 'a desktop keyboard');
 
