@@ -58,6 +58,11 @@ jobs:
           npx tsc --noEmit
           npm run build
 
+      - name: Check the CDN files against their integrity hashes
+        # The browser tests serve them from npm instead, so check what the CDN serves
+        working-directory: ./www
+        run: node scripts/check-cdn-integrity.mjs
+
       - name: Browser tests
         # The built site in Chromium, as a phone and a desktop (playwright.config.ts)
         working-directory: ./www
