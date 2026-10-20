@@ -120,6 +120,17 @@ pub fn color_map(iter_index: f64, max_iter: usize) -> (u8, u8, u8) {
     (r, g, b)
 }
 
+/// A pixel whose base samples differ by more than this in any channel (of 0..=255) is sampled
+/// again on the fine grid. The colors, not the iteration counts, decide: deep in a zoom
+/// neighbouring samples differ by whole iterations almost everywhere, while their colors,
+/// spread over thousands of iterations, barely change.
+pub const REFINE_COLOR_RANGE: u8 = 4;
+
+/// Whether the colors of a pixel's base samples spread over more than REFINE_COLOR_RANGE
+fn needs_refinement(min: [u8; 3], max: [u8; 3]) -> bool {
+    (0..3).any(|k| max[k] - min[k] > REFINE_COLOR_RANGE)
+}
+
 pub fn render_fractal<F>(view: &View, calc_iter: F) -> Vec<u8>
 where
     F: Fn(f64, f64) -> f64,
@@ -143,8 +154,8 @@ where
             let mut g_total = 0.0;
             let mut b_total = 0.0;
             
-            let mut min_iter = f64::MAX;
-            let mut max_iter_val = f64::MIN;
+            let mut min_color = [u8::MAX; 3];
+            let mut max_color = [u8::MIN; 3];
 
             for sy in 0..base_level {
                 for sx in 0..base_level {
@@ -155,10 +166,11 @@ where
 
                     let iter_index = calc_iter(x, y);
 
-                    if iter_index < min_iter { min_iter = iter_index; }
-                    if iter_index > max_iter_val { max_iter_val = iter_index; }
-
                     let color = color_map(iter_index, max_iter);
+                    for (k, value) in [color.0, color.1, color.2].into_iter().enumerate() {
+                        min_color[k] = min_color[k].min(value);
+                        max_color[k] = max_color[k].max(value);
+                    }
                     r_total += color.0 as f64;
                     g_total += color.1 as f64;
                     b_total += color.2 as f64;
@@ -170,7 +182,7 @@ where
             let mut final_b = b_total / base_sq;
 
             // Adaptive refinement
-            if fine_level > base_level && (max_iter_val - min_iter > 0.05) {
+            if fine_level > base_level && needs_refinement(min_color, max_color) {
                 let mut fine_r = 0.0;
                 let mut fine_g = 0.0;
                 let mut fine_b = 0.0;
@@ -203,6 +215,43 @@ where
         }
     }
     data
+}
+
+#[cfg(test)]
+mod tests_refinement {
+    use super::*;
+
+    #[test]
+    fn refines_where_the_colors_differ() {
+        assert!(!needs_refinement([10, 20, 30], [10, 20, 30]));
+        assert!(!needs_refinement([10, 20, 30], [14, 24, 34]));
+        assert!(needs_refinement([10, 20, 30], [10, 25, 30]));
+        assert!(needs_refinement([0, 0, 0], [255, 0, 0]));
+    }
+
+    #[test]
+    fn deep_zoom_refines_only_where_colors_vary() {
+        // Seahorse valley at zoom 10^4, with the site's max_iter for it. Neighbouring samples
+        // differ by whole iterations almost everywhere there, which once refined about 95% of
+        // the pixels: 2x2 + 4x4 samples, close to 20 a pixel
+        let (cx, cy, w) = (-0.743643887037151, 0.131825904205330, 3.0e-4);
+        let size = 120;
+        let view = View {
+            width: size, height: size,
+            x_min: cx - w / 2.0, x_max: cx + w / 2.0,
+            y_min: cy - w / 2.0, y_max: cy + w / 2.0,
+            max_iter: 1297,
+            aa_level: 3,
+        };
+        let samples = std::cell::Cell::new(0usize);
+        render_fractal(&view, |x, y| {
+            samples.set(samples.get() + 1);
+            escape_time_periodic(Complex::new(0.0, 0.0), Complex::new(x, y), view.max_iter, square_step)
+        });
+        let per_pixel = samples.get() as f64 / (size * size) as f64;
+        println!("{per_pixel:.2} samples a pixel");
+        assert!(per_pixel < 14.0, "{per_pixel} samples a pixel");
+    }
 }
 
 /// Helpers that check escape_time_periodic against plain escape_time, shared by the tests
