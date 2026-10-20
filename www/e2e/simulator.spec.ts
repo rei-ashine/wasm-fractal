@@ -132,10 +132,19 @@ test.describe('touch', () => {
   test('one finger scrolls the page over the canvas and shows how to move it', async ({ page }) => {
     const box = await canvasInView(page);
     const scrollY = await page.evaluate(() => window.scrollY);
+    // The hint shows for under a second, which a slow machine can spend before the checks below:
+    // whether it ever showed is recorded as it happens
+    await page.locator('.fractal-simulator .simulator-hint').evaluate((hint) => {
+      const w = window as unknown as { hintShown: boolean };
+      w.hintShown = false;
+      new MutationObserver(() => {
+        if (hint.classList.contains('show')) w.hintShown = true;
+      }).observe(hint, { attributes: true, attributeFilter: ['class'] });
+    });
     const x = box.x + box.width / 2;
     await swipe(page, [{ x, y: box.y + box.height - 20 }], [{ x, y: box.y + 20 }]);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrollY + 50);
-    await expect(page.locator('.fractal-simulator .simulator-hint')).toHaveClass(/\bshow\b/);
+    await expect.poll(() => page.evaluate(() => (window as unknown as { hintShown: boolean }).hintShown)).toBe(true);
     await expect(input(page, 'Center Re')).toHaveValue('-0.5000');
     await expect(input(page, 'Center Im')).toHaveValue('0.0000');
     // It fades once the finger has stopped
