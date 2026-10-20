@@ -28,7 +28,7 @@ node --test "src/**/*.test.ts"        # the view math and the fractal config
 npm run build && npm run test:e2e     # the built site in Chromium, as a phone and a desktop
 ```
 
-The browser tests need Playwright's Chromium once (`npx playwright install chromium`). They serve Bootstrap and MathJax from their npm packages instead of the CDN, and block Google Tag Manager.
+The browser tests need Playwright's Chromium once (`npx playwright install chromium`). They serve Bootstrap and MathJax from their npm packages instead of the CDN, and block Google Tag Manager. What the CDN serves is checked against the integrity hashes in `index.html` by `node scripts/check-cdn-integrity.mjs` (in `www`, run on CI).
 
 ## Directory Structure
 
@@ -80,6 +80,8 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
     │   │   └── rust-logo-256x256.png
     │   └── css
     │       └── template.css
+    ├── scripts
+    │   └── check-cdn-integrity.mjs
     ├── src
     │   ├── components
     │   │   ├── FractalCanvas.tsx
@@ -115,7 +117,7 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
     ├── tsconfig.json
     └── vite.config.ts
 
-21 directories, 59 files
+22 directories, 60 files
 ```
 
 ---
@@ -125,21 +127,22 @@ The browser tests need Playwright's Chromium once (`npx playwright install chrom
  Language              Files        Lines         Code     Comments       Blanks
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  CSS                       1          299          256           31           12
+ JavaScript                1           26           21            4            1
  JSON                      3         2392         2392            0            0
- Markdown                  1          163            0          140           23
+ Markdown                  1          166            0          143           23
  TOML                      1           30           23            2            5
  TSX                      11          874          697           85           92
  TypeScript               18         1876         1477          224          175
 ─────────────────────────────────────────────────────────────────────────────────
- HTML                      1           33           24            9            0
+ HTML                      1           34           24           10            0
  |- JavaScript             1            5            5            0            0
- (Total)                               38           29            9            0
+ (Total)                               39           29           10            0
 ─────────────────────────────────────────────────────────────────────────────────
  Rust                      7          921          663          124          134
  |- Markdown               2           41            0           37            4
  (Total)                              962          663          161          138
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- Total                    43         6634         5537          652          445
+ Total                    44         6664         5558          660          446
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
