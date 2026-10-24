@@ -49,6 +49,9 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '24'
+          # The newest 24.x, not an older one cached on the runner, so security fixes
+          # (such as CVE-2026-111497 in 24.22.1) apply as soon as they are released
+          check-latest: true
 
       - name: Test Rust
         # test-fast: release optimizations without LTO (see Cargo.toml)
