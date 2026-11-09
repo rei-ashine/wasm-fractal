@@ -34,6 +34,12 @@ const Terms: React.FC = () => {
         </li>
 
         <li>
+          AI training: Please do not crawl the website to train AI models.
+          Its <a href="https://rei-ashine.github.io/robots.txt" target="_blank" rel="noopener noreferrer">robots.txt</a> asks the known AI training crawlers not to collect it, while search engines may.
+          This is a request about crawling the website: it does not narrow the licenses of the source code above or your use of the images you render.
+        </li>
+
+        <li>
           Privacy: The website uses Google Tag Manager and Google Analytics, as described in the <Link to="/privacy">Privacy Policy</Link>.
           It also loads Bootstrap and MathJax from jsDelivr and fonts from Google Fonts, whose own terms apply to those services.
         </li>
@@ -56,7 +62,7 @@ const Terms: React.FC = () => {
         </li>
       </ol>
 
-      <p>These terms were last updated on October 19, 2026.</p>
+      <p>These terms were last updated on November 9, 2026.</p>
       <br />
     </div>
   );
