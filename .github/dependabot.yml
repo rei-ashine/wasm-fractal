@@ -19,3 +19,13 @@ updates:
     labels:
       - "dependencies"
       - "rust"
+
+  # The actions the workflows in .github/workflows use
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "github-actions"
